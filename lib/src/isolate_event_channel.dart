@@ -25,7 +25,7 @@ class IsolateEventChannel {
           final reply = call.arguments;
           if (reply == null) {
             controller.close();
-          } else if (reply is IsolateExcaption) {
+          } else if (reply is IsolateException) {
             controller.addError(reply);
           } else {
             controller.add(reply);
@@ -119,7 +119,7 @@ class IsolateEventSink {
   void error({required String code, String? message, Object? details}) =>
       _channel.invokeMethod(
         '',
-        IsolateExcaption(code: code, message: message, details: details),
+        IsolateException(code: code, message: message, details: details),
       );
 
   /// Send an end of stream event.
@@ -127,7 +127,7 @@ class IsolateEventSink {
 }
 
 /// An exception thrown by the isolate
-class IsolateExcaption {
+class IsolateException {
   /// The code of the exception
   final String code;
 
@@ -138,5 +138,5 @@ class IsolateExcaption {
   final Object? details;
 
   /// Constructor
-  const IsolateExcaption({required this.code, this.message, this.details});
+  const IsolateException({required this.code, this.message, this.details});
 }
