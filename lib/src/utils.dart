@@ -1,21 +1,19 @@
 import 'dart:isolate';
 
 /// Helper function to spawn an isolate that supports channel communication
-Future<(SendPort, Stream, void Function() shutdown)> spawnIsolate<T>(
+Future<(SendPort, Stream, void Function())> spawnIsolate<T>(
   void Function(SendPort message) entryPoint,
 ) async {
   final receivePort = ReceivePort();
-  final stream = receivePort.asBroadcastStream();
+  final receive = receivePort.asBroadcastStream();
   final isolate = await Isolate.spawn(entryPoint, receivePort.sendPort);
-  final sendPort = await stream.first as SendPort;
-  return (
-    sendPort,
-    stream,
-    () {
-      receivePort.close();
-      isolate.kill();
-    },
-  );
+  final send = await receive.first as SendPort;
+  void shutdown() {
+    receivePort.close();
+    isolate.kill();
+  }
+
+  return (send, receive, shutdown);
 }
 
 /// Helper function to set up an isolate for channel communication
