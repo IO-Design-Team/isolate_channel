@@ -24,6 +24,13 @@ class IsolateMethodChannel {
     receivePort.close();
     if (result is T) {
       return result;
+    } else if (result == null) {
+      return Future.error(
+        IsolateException(
+          code: 'null_result',
+          message: 'Unexpected null result',
+        ),
+      );
     } else {
       return Future.error(result);
     }
