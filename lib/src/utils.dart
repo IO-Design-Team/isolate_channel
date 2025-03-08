@@ -20,10 +20,10 @@ Future<(SendPort, Stream, void Function())> spawnIsolate<T>(
 Stream setupIsolate(SendPort sendPort) {
   final receivePort = ReceivePort();
   sendPort.send(receivePort.sendPort);
-  final stream = receivePort.asBroadcastStream();
-  stream
+  final receive = receivePort.asBroadcastStream();
+  receive
       .where((message) => message is SendPort)
       .cast<SendPort>()
       .listen((sendPort) => sendPort.send(receivePort.sendPort));
-  return stream;
+  return receive;
 }
