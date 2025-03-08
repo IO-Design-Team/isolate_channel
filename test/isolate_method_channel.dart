@@ -33,8 +33,8 @@ void main() async {
   });
 }
 
-void isolateEntryPoint(SendPort sendPort) {
-  final (send, receive) = setupIsolate(sendPort);
+void isolateEntryPoint(SendPort send) {
+  final receive = setupIsolate(send);
 
   final channel = IsolateMethodChannel('test', send, receive);
   channel.setMethodCallHandler((call, result) => result(call.arguments));

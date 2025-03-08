@@ -10,7 +10,6 @@ class IsolateEventChannel {
   final String name;
   final SendPort _sendPort;
   final Stream _receivePort;
-  StreamSubscription? _handlerSubscription;
 
   /// Constructor
   IsolateEventChannel(this.name, this._sendPort, this._receivePort);
@@ -48,20 +47,16 @@ class IsolateEventChannel {
   ///
   /// To be called from the isolate sending events
   void setStreamHandler(IsolateStreamHandler? handler) {
-    _handlerSubscription?.cancel();
     if (handler == null) return;
-
-    _handlerSubscription = _receivePort
-        .where((message) => message is IsolateMessage && message.name == name)
-        .cast<IsolateMessage>()
-        .listen((message) {
-          switch (message.method) {
-            case 'listen':
-              handler.onListen(message.arguments, IsolateEventSink(_sendPort));
-            case 'cancel':
-              handler.onCancel(message.arguments);
-          }
-        });
+    final methodChannel = IsolateMethodChannel(name, _sendPort, _receivePort);
+    methodChannel.setMethodCallHandler((call, result) {
+      switch (call.method) {
+        case 'listen':
+          handler.onListen(call.arguments, IsolateEventSink(_sendPort));
+        case 'cancel':
+          handler.onCancel(call.arguments);
+      }
+    });
   }
 }
 

@@ -10,8 +10,8 @@ void main() async {
   print(result);
 }
 
-void isolateEntryPoint(SendPort sendPort) {
-  final (send, receive) = setupIsolate(sendPort);
+void isolateEntryPoint(SendPort send) {
+  final receive = setupIsolate(send);
 
   final channel = IsolateMethodChannel('example_channel', send, receive);
   channel.setMethodCallHandler((call, result) {

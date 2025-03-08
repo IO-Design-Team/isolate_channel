@@ -12,7 +12,7 @@ Future<(SendPort, Stream)> spawnIsolate<T>(
 }
 
 /// Helper function to set up an isolate for channel communication
-(SendPort, Stream) setupIsolate(SendPort sendPort) {
+Stream setupIsolate(SendPort sendPort) {
   final receivePort = ReceivePort();
   sendPort.send(receivePort.sendPort);
   final stream = receivePort.asBroadcastStream();
@@ -20,5 +20,5 @@ Future<(SendPort, Stream)> spawnIsolate<T>(
       .where((message) => message is SendPort)
       .cast<SendPort>()
       .listen((sendPort) => sendPort.send(receivePort.sendPort));
-  return (receivePort.sendPort, stream);
+  return stream;
 }
