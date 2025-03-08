@@ -7,14 +7,15 @@ import 'package:isolate_channel/src/isolate_message.dart';
 class IsolateMethodChannel {
   final String name;
   final SendPort _sendPort;
-  final _handlerSubscriptions = <StreamSubscription>[];
+  final Stream _receivePort;
+  StreamSubscription? _handlerSubscription;
 
-  IsolateMethodChannel(this.name, this._sendPort);
+  IsolateMethodChannel(this.name, this._sendPort, this._receivePort);
 
   Future<T?> _invokeMethod<T>(String method, {dynamic arguments}) async {
     final receivePort = ReceivePort();
     _sendPort.send(
-      IsolateMessage(receivePort.sendPort, name, method, arguments),
+      IsolateMessage(name, method, arguments, receivePort.sendPort),
     );
     final result = await receivePort.first;
     receivePort.close();
@@ -45,40 +46,20 @@ class IsolateMethodChannel {
     return result?.cast<K, V>();
   }
 
-  void addMethodCallHandler(
-    SendPort sendPort,
-    void Function(IsolateMethodCall call, IsolateResult result)
-    handler,
+  void setMethodCallHandler(
+    void Function(IsolateMethodCall call, IsolateResult result)? handler,
   ) {
-    final receivePort = ReceivePort();
-    final subscription = receivePort
+    _handlerSubscription?.cancel();
+    if (handler == null) return;
+
+    _handlerSubscription = _receivePort
         .where((message) => message is IsolateMessage && message.name == name)
         .cast<IsolateMessage>()
         .listen((message) {
-          if (message.method == 'addMethodCallHandler') {
-            message.sendPort.send(sendPort);
-          } else {
-            handler.call(
-              IsolateMethodCall(message.method, message.arguments),
-              IsolateResult(message.sendPort),
-            );
-          }
+          handler.call(
+            IsolateMethodCall(message.method, message.arguments),
+            IsolateResult(message.sendPort),
+          );
         });
-    _handlerSubscriptions.add(subscription);
-    sendPort.send(
-      IsolateMessage(
-        receivePort.sendPort,
-        name,
-        'addMethodCallHandler',
-        handler,
-      ),
-    );
-  }
-
-  void close() {
-    for (final subscription in _handlerSubscriptions) {
-      subscription.cancel();
-    }
-    _handlerSubscriptions.clear();
   }
 }

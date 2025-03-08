@@ -1,9 +1,6 @@
 import 'dart:isolate';
 
 class IsolateMessage {
-  /// The port to respond to
-  final SendPort sendPort;
-
   /// The name of the channel sending the message
   final String name;
 
@@ -13,6 +10,15 @@ class IsolateMessage {
   /// The arguments to pass to the method
   final dynamic arguments;
 
+  /// The port to respond to
+  final SendPort sendPort;
+
   /// Constructor
-  const IsolateMessage(this.sendPort, this.name, this.method, this.arguments);
+  const IsolateMessage(
+    this.name,
+
+    this.method,
+    this.arguments,
+    this.sendPort,
+  );
 }
