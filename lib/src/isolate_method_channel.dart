@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/isolate_message.dart';
+import 'package:isolate_channel/src/model/isolate_message.dart';
 
 /// A method channel for inter-isolate method invocation
 class IsolateMethodChannel {

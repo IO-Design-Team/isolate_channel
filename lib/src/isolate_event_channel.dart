@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/isolate_message.dart';
+import 'package:isolate_channel/src/model/isolate_message.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
