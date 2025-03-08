@@ -56,6 +56,7 @@ class IsolateEventChannel {
           result(null);
         case 'cancel':
           handler.onCancel(call.arguments);
+          methodChannel.setMethodCallHandler(null);
           result(null);
       }
     });
