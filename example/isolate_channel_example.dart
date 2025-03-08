@@ -3,23 +3,24 @@ import 'dart:isolate';
 import 'package:isolate_channel/isolate_channel.dart';
 
 void main() async {
-  final (sendPort, stream) = await spawnIsolate(isolateMain);
+  final (send, receive) = await spawnIsolate(isolateEntryPoint);
 
-  final channel = IsolateMethodChannel('test', sendPort, stream);
-  channel.setMethodCallHandler((call, result) {
-    print(call);
-  });
-
-  final result = await channel.invokeMethod('test', 'Hello');
+  final channel = IsolateMethodChannel('example_channel', send, receive);
+  final result = await channel.invokeMethod('example_method', 'Hello');
   print(result);
 }
 
-void isolateMain(SendPort initSendPort) {
-  final (sendPort, stream) = setupIsolate(initSendPort);
+void isolateEntryPoint(SendPort sendPort) {
+  final (send, receive) = setupIsolate(sendPort);
 
-  final channel = IsolateMethodChannel('test', sendPort, stream);
+  final channel = IsolateMethodChannel('example_channel', send, receive);
   channel.setMethodCallHandler((call, result) {
-    print(call.arguments);
-    result('World!');
+    switch (call.method) {
+      case 'example_method':
+        print(call.arguments);
+        result('World!');
+      default:
+        throw UnimplementedError('Unknown method: ${call.method}');
+    }
   });
 }

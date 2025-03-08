@@ -5,7 +5,6 @@ version: 1.0.0
 environment:
   sdk: ^3.7.0
 
-dependencies:
 dev_dependencies:
   test: ^1.24.0
   rexios_lints: ^10.1.0

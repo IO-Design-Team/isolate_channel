@@ -65,6 +65,13 @@ class IsolateEventChannel {
   }
 }
 
+/// Typedef for the inline onListen callback
+typedef IsolateStreamHandlerOnListen =
+    void Function(dynamic arguments, IsolateEventSink events);
+
+/// Typedef for the inline onCancel callback
+typedef IsolateStreamHandlerOnCancel = void Function(dynamic arguments);
+
 /// A handler for setting up stream handling
 abstract class IsolateStreamHandler {
   /// Called when the stream is listened to
@@ -72,6 +79,33 @@ abstract class IsolateStreamHandler {
 
   /// Called when the stream is canceled
   void onCancel(dynamic arguments);
+
+  /// Constructor
+  const IsolateStreamHandler();
+
+  /// Create an inline handler
+  factory IsolateStreamHandler.inline({
+    required IsolateStreamHandlerOnListen onListen,
+    IsolateStreamHandlerOnCancel? onCancel,
+  }) => _InlineIsolateStreamHandler(onListen: onListen, onCancel: onCancel);
+}
+
+class _InlineIsolateStreamHandler extends IsolateStreamHandler {
+  final IsolateStreamHandlerOnListen _onListenInline;
+  final IsolateStreamHandlerOnCancel? _onCancelInline;
+
+  _InlineIsolateStreamHandler({
+    required IsolateStreamHandlerOnListen onListen,
+    IsolateStreamHandlerOnCancel? onCancel,
+  }) : _onListenInline = onListen,
+       _onCancelInline = onCancel;
+
+  @override
+  void onListen(dynamic arguments, IsolateEventSink events) =>
+      _onListenInline(arguments, events);
+
+  @override
+  void onCancel(dynamic arguments) => _onCancelInline?.call(arguments);
 }
 
 /// A sink for sending events to the stream
