@@ -10,9 +10,9 @@ void main() async {
   tearDownAll(shutdown);
 
   group('event channel', () {
-    test('listen', () async {
+    test('listen', () {
       final stream = channel.receiveBroadcastStream();
-      expect(await stream.first, 'Hello');
+      expect(stream, emitsInOrder(['Hello', emitsDone]));
     });
   });
 }
