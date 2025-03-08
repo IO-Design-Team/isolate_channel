@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/model/isolate_message.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
@@ -31,6 +30,7 @@ class IsolateEventChannel {
           } else {
             controller.add(reply);
           }
+          result(null);
         });
 
         await methodChannel.invokeMethod<void>('listen', arguments);
@@ -52,9 +52,11 @@ class IsolateEventChannel {
     methodChannel.setMethodCallHandler((call, result) {
       switch (call.method) {
         case 'listen':
-          handler.onListen(call.arguments, IsolateEventSink(_sendPort));
+          handler.onListen(call.arguments, IsolateEventSink(methodChannel));
+          result(null);
         case 'cancel':
           handler.onCancel(call.arguments);
+          result(null);
       }
     });
   }
@@ -106,21 +108,22 @@ class _InlineIsolateStreamHandler extends IsolateStreamHandler {
 /// A sink for sending events to the stream
 class IsolateEventSink {
   /// Create a new [IsolateEventSink] with the given [SendPort].
-  IsolateEventSink(this._sendPort);
+  IsolateEventSink(this._channel);
 
-  final SendPort _sendPort;
+  final IsolateMethodChannel _channel;
 
   /// Send a success event.
-  void success(Object? event) => _sendPort.send(event);
+  void success(Object? event) => _channel.invokeMethod('', event);
 
   /// Send an error event.
   void error({required String code, String? message, Object? details}) =>
-      _sendPort.send(
+      _channel.invokeMethod(
+        '',
         IsolateExcaption(code: code, message: message, details: details),
       );
 
   /// Send an end of stream event.
-  void endOfStream() => _sendPort.send(null);
+  void endOfStream() => _channel.invokeMethod('', null);
 }
 
 /// An exception thrown by the isolate

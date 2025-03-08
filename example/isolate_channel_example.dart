@@ -3,11 +3,13 @@ import 'dart:isolate';
 import 'package:isolate_channel/isolate_channel.dart';
 
 void main() async {
-  final (send, receive) = await spawnIsolate(isolateEntryPoint);
+  final (send, receive, shutdown) = await spawnIsolate(isolateEntryPoint);
 
   final channel = IsolateMethodChannel('example_channel', send, receive);
   final result = await channel.invokeMethod('example_method', 'Hello');
   print(result);
+
+  shutdown();
 }
 
 void isolateEntryPoint(SendPort send) {

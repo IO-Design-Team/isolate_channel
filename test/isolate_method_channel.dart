@@ -4,8 +4,10 @@ import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 void main() async {
-  final (send, receive) = await spawnIsolate(isolateEntryPoint);
+  final (send, receive, shutdown) = await spawnIsolate(isolateEntryPoint);
   final channel = IsolateMethodChannel('test', send, receive);
+
+  tearDownAll(shutdown);
 
   group('method channel', () {
     test('invoke method', () async {

@@ -4,19 +4,21 @@ import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 void main() async {
-  final (send, receive) = await spawnIsolate(isolateEntryPoint);
+  final (send, receive, shutdown) = await spawnIsolate(isolateEntryPoint);
   final channel = IsolateEventChannel('test', send, receive);
+
+  tearDownAll(shutdown);
 
   group('event channel', () {
     test('listen', () async {
-      final stream = channel.receiveBroadcastStream().listen(print);
-      // expect(await stream.first, 'Hello');
+      final stream = channel.receiveBroadcastStream();
+      expect(await stream.first, 'Hello');
     });
   });
 }
 
 void isolateEntryPoint(SendPort send) {
-  final receive= setupIsolate(send);
+  final receive = setupIsolate(send);
 
   final channel = IsolateEventChannel('test', send, receive);
   channel.setStreamHandler(
