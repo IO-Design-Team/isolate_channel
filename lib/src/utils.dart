@@ -27,3 +27,18 @@ Stream setupIsolate(SendPort sendPort) {
       .listen((sendPort) => sendPort.send(receivePort.sendPort));
   return receive;
 }
+
+/// Helper function to connect to an existing isolate
+Future<(SendPort, Stream, void Function())> connectToIsolate(
+  SendPort sendPort,
+) async {
+  final receivePort = ReceivePort();
+  sendPort.send(receivePort.sendPort);
+  final receive = receivePort.asBroadcastStream();
+  final send = await receive.first as SendPort;
+  void shutdown() {
+    receivePort.close();
+  }
+
+  return (send, receive, shutdown);
+}
