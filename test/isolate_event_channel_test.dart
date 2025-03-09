@@ -3,6 +3,8 @@ import 'dart:isolate';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
+import 'common.dart';
+
 void main() async {
   final connection = await spawnIsolate(isolateEntryPoint);
   final channel = IsolateEventChannel('test', connection);
@@ -17,10 +19,11 @@ void main() async {
         emitsInOrder([
           'Hello',
           emitsError(
-            isA<IsolateException>()
-                .having((e) => e.code, 'code', 'code')
-                .having((e) => e.message, 'message', 'message')
-                .having((e) => e.details, 'details', 'details'),
+            isAIsolateException(
+              code: 'code',
+              message: 'message',
+              details: 'details',
+            ),
           ),
           emitsDone,
         ]),
