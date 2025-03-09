@@ -12,7 +12,7 @@ class IsolateResult {
   /// Send a result to the sender
   void call(Object? result) => _sendPort.send(result);
 
-  /// Inform the caller the the method is not implemented
+  /// Inform the caller that the method is not implemented
   void notImplemented() =>
       _sendPort.send(IsolateException(code: 'not_implemented'));
 }
