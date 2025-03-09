@@ -105,7 +105,7 @@ void isolateEntryPoint(SendPort send) {
           details: 'details',
         );
       default:
-        return IsolateException(code: 'not_implemented');
+        return IsolateException.notImplemented(call.method);
     }
   });
 }
