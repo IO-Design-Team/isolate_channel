@@ -29,6 +29,39 @@ void main() async {
         ]),
       );
     });
+
+    test('owner issues', () {
+      IsolateEventChannel createChannel(bool owner) {
+        final receive = ReceivePort();
+        final send = receive.sendPort;
+
+        final connection = IsolateConnection(
+          owner: owner,
+          send: send,
+          receive: receive,
+          shutdown: () {},
+        );
+        return IsolateEventChannel('', connection);
+      }
+
+      expect(
+        () => createChannel(true).receiveBroadcastStream(),
+        returnsNormally,
+      );
+      expect(
+        () => createChannel(false).receiveBroadcastStream(),
+        throwsA(isAIsolateException(code: 'not_owner')),
+      );
+
+      expect(
+        () => createChannel(true).setStreamHandler(null),
+        throwsA(isAIsolateException(code: 'owner')),
+      );
+      expect(
+        () => createChannel(false).setStreamHandler(null),
+        returnsNormally,
+      );
+    });
   });
 }
 
