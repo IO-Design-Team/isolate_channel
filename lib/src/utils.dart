@@ -40,7 +40,7 @@ IsolateConnection setupIsolate(SendPort send) {
 }
 
 /// Helper function to connect to an existing isolate
-Future<IsolateConnection> connectToIsolate(SendPort send) async {
+IsolateConnection connectToIsolate(SendPort send) {
   final receivePort = ReceivePort();
   send.send(IsolateConnect(receivePort.sendPort));
   final receive = receivePort.asBroadcastStream();

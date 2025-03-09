@@ -50,7 +50,7 @@ void isolate1EntryPoint(SendPort send) {
 void isolate2EntryPoint(SendPort send) async {
   final connection1 = setupIsolate(send);
   final send2 = await connection1.receive.first;
-  final connection2 = await connectToIsolate(send2);
+  final connection2 = connectToIsolate(send2);
   connection2.send('Hello');
   connection2.shutdown();
 }
