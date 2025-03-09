@@ -12,13 +12,11 @@ class IsolateException {
   /// Constructor
   const IsolateException({required this.code, this.message, this.details});
 
-  /// Copy with
-  IsolateException copyWith({String? message, Object? details}) =>
-      IsolateException(
-        code: code,
-        message: message ?? this.message,
-        details: details ?? this.details,
-      );
+  /// Constructor for a not implemented exception
+  const IsolateException.notImplemented(String method)
+    : code = 'not_implemented',
+      message = 'Method $method not implemented',
+      details = null;
 
   @override
   String toString() =>

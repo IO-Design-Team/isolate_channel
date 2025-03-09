@@ -16,13 +16,13 @@ void isolateEntryPoint(SendPort send) {
   final connection = setupIsolate(send);
 
   final channel = IsolateMethodChannel('example_channel', connection);
-  channel.setMethodCallHandler((call, result) {
+  channel.setMethodCallHandler((call) {
     switch (call.method) {
       case 'example_method':
         print(call.arguments);
-        result('World!');
+        return 'World!';
       default:
-        throw UnimplementedError('Unknown method: ${call.method}');
+        return IsolateException.notImplemented(call.method);
     }
   });
 }

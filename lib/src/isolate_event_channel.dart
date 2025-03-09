@@ -26,7 +26,7 @@ class IsolateEventChannel {
     late StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(
       onListen: () async {
-        methodChannel.setMethodCallHandler((call, result) {
+        methodChannel.setMethodCallHandler((call) {
           final reply = call.arguments;
           if (reply == null) {
             controller.close();
@@ -35,7 +35,6 @@ class IsolateEventChannel {
           } else {
             controller.add(reply);
           }
-          result(null);
         });
 
         await methodChannel.invokeMethod<void>('listen', arguments);
@@ -61,15 +60,13 @@ class IsolateEventChannel {
 
     if (handler == null) return;
     final methodChannel = IsolateMethodChannel(name, _connection);
-    methodChannel.setMethodCallHandler((call, result) {
+    methodChannel.setMethodCallHandler((call) {
       switch (call.method) {
         case 'listen':
           handler.onListen(call.arguments, IsolateEventSink(methodChannel));
-          result(null);
         case 'cancel':
           handler.onCancel(call.arguments);
           methodChannel.setMethodCallHandler(null);
-          result(null);
       }
     });
   }

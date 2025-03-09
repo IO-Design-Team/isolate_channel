@@ -33,13 +33,7 @@ class IsolateMethodChannel {
     final result = await receivePort.first;
     receivePort.close();
     if (result is IsolateException) {
-      final IsolateException exception;
-      if (result.code == 'not_implemented') {
-        exception = result.copyWith(message: 'Method $method not implemented');
-      } else {
-        exception = result;
-      }
-      return Future.error(exception);
+      return Future.error(result);
     } else if (result is T) {
       return result;
     } else {
@@ -77,7 +71,7 @@ class IsolateMethodChannel {
 
   /// Set a handler to receive method invocations from connected isolates
   void setMethodCallHandler(
-    void Function(IsolateMethodCall call, IsolateResult result)? handler,
+    FutureOr<dynamic> Function(IsolateMethodCall call)? handler,
   ) {
     _handlerSubscription?.cancel();
     if (handler == null) return;
@@ -85,11 +79,11 @@ class IsolateMethodChannel {
     _handlerSubscription = _connection.receive
         .where((message) => message is MethodInvocation && message.name == name)
         .cast<MethodInvocation>()
-        .listen((message) {
-          handler.call(
+        .listen((message) async {
+          final result = await handler.call(
             IsolateMethodCall(message.method, message.arguments),
-            IsolateResult(message.sendPort),
           );
+          message.sendPort.send(result);
         });
   }
 }

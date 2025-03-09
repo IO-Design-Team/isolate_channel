@@ -90,24 +90,22 @@ void isolateEntryPoint(SendPort send) {
   final connection = setupIsolate(send);
 
   final channel = IsolateMethodChannel('test', connection);
-  channel.setMethodCallHandler((call, result) {
+  channel.setMethodCallHandler((call) {
     switch (call.method) {
       case 'invokeMethod':
       case 'invokeListMethod':
       case 'invokeMapMethod':
-        result(call.arguments);
+        return call.arguments;
       case 'return_null':
-        result(null);
+        return null;
       case 'return_error':
-        result(
-          IsolateException(
-            code: 'code',
-            message: 'message',
-            details: 'details',
-          ),
+        return IsolateException(
+          code: 'code',
+          message: 'message',
+          details: 'details',
         );
       default:
-        result.notImplemented();
+        return IsolateException(code: 'not_implemented');
     }
   });
 }
