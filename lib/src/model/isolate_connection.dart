@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:isolate';
 
+import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/connection_message.dart';
 
 /// A connection between isolates
@@ -37,6 +38,21 @@ class IsolateConnection {
               _sendPorts.remove(message.sendPort);
           }
         });
+  }
+
+  /// Wrapper function to allow registering a [SendPort] with an
+  /// [IsolateNameService] without exposing the [_sendPorts] field
+  bool registerPortWithName(
+    String name,
+    bool Function(SendPort port, String name) register,
+  ) {
+    if (!owner) {
+      throw IsolateException(
+        code: 'not_owner',
+        message: 'Only the connection owner can register ports',
+      );
+    }
+    return register(_sendPorts.single, name);
   }
 
   /// Send a message to all connected isolates

@@ -1,31 +1,49 @@
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
+import 'package:isolate_channel/src/model/internal/connection_message.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('utils', () {
     test('spawn and setup isolate', () async {
-      final (send, receive, shutdown) = await spawnIsolate((send) {
-        final receive = setupIsolate(send);
-        receive.listen(send.send);
-      });
-      expect(receive, emitsInOrder(['Hello', emitsDone]));
-      send.send('Hello');
-      await receive.first;
-      shutdown();
+      final connection = await spawnIsolate(isolate1EntryPoint);
+      expect(connection.receive, emitsInOrder(['Hello', emitsDone]));
+      connection.send('Hello');
+      // Wait for the message to be received
+      await connection.receive.first;
+      connection.shutdown();
     });
 
     test('connect to isolate', () async {
-      final (send, receive, shutdown) = await spawnIsolate((send) {
-        final receive = setupIsolate(send);
-        receive.listen(send.send);
+      final connection1 = await spawnIsolate(isolate1EntryPoint);
+      late final SendPort send;
+      connection1.registerPortWithName('test', (port, name) {
+        send = port;
+        return true;
       });
-      await Isolate.run(() => isolateEntryPoint(send));
+      final connection2 = await spawnIsolate(isolate2EntryPoint);
+      connection2.send(send);
+      expect(
+        connection1.receive,
+        emitsInOrder([isA<IsolateConnect>(), 'Hello', emitsDone]),
+      );
+      // Wait for the messages to be received
+      await connection1.receive.take(2).toList();
+      connection1.shutdown();
+      connection2.shutdown();
     });
   });
 }
 
-Future<void> isolateEntryPoint(SendPort sendPort) async {
-  final (send, receive, shutdown) = await connectToIsolate(sendPort);
+void isolate1EntryPoint(SendPort send) {
+  final connection = setupIsolate(send);
+  connection.receive.listen(connection.send);
+}
+
+void isolate2EntryPoint(SendPort send) async {
+  final connection1 = setupIsolate(send);
+  final send2 = await connection1.receive.first;
+  final connection2 = await connectToIsolate(send2);
+  connection2.send('Hello');
 }
