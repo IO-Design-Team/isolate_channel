@@ -14,14 +14,7 @@ void main() async {
   group('method channel', () {
     test('invoke method', () async {
       final result = await channel.invokeMethod('invokeMethod', 'Hello');
-      expect(
-        result,
-        isAMethodInvocation(
-          name: 'test',
-          method: 'invokeMethod',
-          arguments: 'Hello',
-        ),
-      );
+      expect(result, 'Hello');
     });
 
     test('invoke list method', () async {
@@ -30,14 +23,7 @@ void main() async {
         2,
         3,
       ]);
-      expect(
-        result,
-        isAMethodInvocation(
-          name: 'test',
-          method: 'invokeListMethod',
-          arguments: [1, 2, 3],
-        ),
-      );
+      expect(result, [1, 2, 3]);
     });
 
     test('invoke map method', () async {
@@ -46,21 +32,14 @@ void main() async {
         'b': 2,
         'c': 3,
       });
-      expect(
-        result,
-        isAMethodInvocation(
-          name: 'test',
-          method: 'invokeMapMethod',
-          arguments: {'a': 1, 'b': 2, 'c': 3},
-        ),
-      );
+      expect(result, {'a': 1, 'b': 2, 'c': 3});
     });
 
-    test('unexpected null result', () {
+    test('unexpected result', () {
       expect(channel.invokeMethod<Object?>('return_null'), completes);
       expect(
         channel.invokeMethod<Object>('return_null'),
-        throwsA(isAIsolateException(code: 'null_result')),
+        throwsA(isAIsolateException(code: 'unexpected_result')),
       );
     });
 
@@ -76,6 +55,18 @@ void main() async {
         ),
       );
     });
+
+    test('not implemented', () {
+      expect(
+        channel.invokeMethod<Object>('not_implemented'),
+        throwsA(
+          isAIsolateException(
+            code: 'not_implemented',
+            message: contains('not_implemented'),
+          ),
+        ),
+      );
+    });
   });
 }
 
@@ -85,6 +76,10 @@ void isolateEntryPoint(SendPort send) {
   final channel = IsolateMethodChannel('test', connection);
   channel.setMethodCallHandler((call, result) {
     switch (call.method) {
+      case 'invokeMethod':
+      case 'invokeListMethod':
+      case 'invokeMapMethod':
+        result(call.arguments);
       case 'return_null':
         result(null);
       case 'return_error':
@@ -96,7 +91,7 @@ void isolateEntryPoint(SendPort send) {
           ),
         );
       default:
-        result(call);
+        result.notImplemented();
     }
   });
 }

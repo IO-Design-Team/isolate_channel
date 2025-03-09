@@ -32,17 +32,23 @@ class IsolateMethodChannel {
     );
     final result = await receivePort.first;
     receivePort.close();
-    if (result is T) {
+    if (result is IsolateException) {
+      final IsolateException exception;
+      if (result.code == 'not_implemented') {
+        exception = result.copyWith(message: 'Method $method not implemented');
+      } else {
+        exception = result;
+      }
+      return Future.error(exception);
+    } else if (result is T) {
       return result;
-    } else if (result == null) {
+    } else {
       return Future.error(
         IsolateException(
-          code: 'null_result',
-          message: 'Unexpected null result',
+          code: 'unexpected_result',
+          message: 'Unexpected result: $result',
         ),
       );
-    } else {
-      return Future.error(result);
     }
   }
 
