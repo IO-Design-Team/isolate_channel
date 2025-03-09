@@ -26,12 +26,18 @@ void main() {
       connection2.send(send);
       expect(
         connection1.receive,
-        emitsInOrder([isA<IsolateConnect>(), 'Hello', emitsDone]),
+        emitsInOrder([
+          isA<IsolateConnect>(),
+          'Hello',
+          isA<IsolateDisconnect>(),
+          emitsDone,
+        ]),
       );
       // Wait for the messages to be received
       await connection1.receive.take(2).toList();
-      connection1.shutdown();
       connection2.shutdown();
+      await connection1.receive.first;
+      connection1.shutdown();
     });
   });
 }
@@ -46,4 +52,5 @@ void isolate2EntryPoint(SendPort send) async {
   final send2 = await connection1.receive.first;
   final connection2 = await connectToIsolate(send2);
   connection2.send('Hello');
+  connection2.shutdown();
 }

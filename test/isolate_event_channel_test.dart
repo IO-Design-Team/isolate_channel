@@ -5,9 +5,9 @@ import 'package:test/test.dart';
 
 void main() async {
   final connection = await spawnIsolate(isolateEntryPoint);
-  final channel = IsolateEventChannel('test', send, receive);
+  final channel = IsolateEventChannel('test', connection);
 
-  tearDownAll(shutdown);
+  tearDownAll(connection.shutdown);
 
   group('event channel', () {
     test('listen', () {
@@ -18,9 +18,9 @@ void main() async {
 }
 
 void isolateEntryPoint(SendPort send) {
-  final receive = setupIsolate(send);
+  final connection = setupIsolate(send);
 
-  final channel = IsolateEventChannel('test', send, receive);
+  final channel = IsolateEventChannel('test', connection);
   channel.setStreamHandler(
     IsolateStreamHandler.inline(
       onListen: (arguments, events) {
