@@ -45,7 +45,7 @@ void main() async {
 
     test('error result', () {
       expect(
-        channel.invokeMethod<int>('return_error'),
+        channel.invokeMethod('return_error'),
         throwsA(
           isAIsolateException(
             code: 'code',
@@ -58,7 +58,7 @@ void main() async {
 
     test('not implemented', () {
       expect(
-        channel.invokeMethod<Object>('not_implemented'),
+        channel.invokeMethod('not_implemented'),
         throwsA(
           isAIsolateException(
             code: 'not_implemented',

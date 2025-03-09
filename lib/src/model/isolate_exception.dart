@@ -19,4 +19,8 @@ class IsolateException {
         message: message ?? this.message,
         details: details ?? this.details,
       );
+
+  @override
+  String toString() =>
+      'IsolateException(code: $code, message: $message, details: $details)';
 }
