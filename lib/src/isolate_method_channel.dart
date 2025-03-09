@@ -2,23 +2,33 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/model/isolate_message.dart';
+import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A method channel for inter-isolate method invocation
 class IsolateMethodChannel {
   /// The name of the channel
   final String name;
-  final SendPort _sendPort;
-  final Stream _receivePort;
+  final IsolateConnection _connection;
   StreamSubscription? _handlerSubscription;
 
   /// Constructor
-  IsolateMethodChannel(this.name, this._sendPort, this._receivePort);
+  IsolateMethodChannel(this.name, this._connection);
 
   Future<T> _invokeMethod<T>(String method, {dynamic arguments}) async {
+    if (_connection.connections > 1) {
+      // Methods invocations cannot be sent to multiple isolates because only
+      // one would be able to respond
+      return Future.error(
+        IsolateException(
+          code: 'multiple_connections',
+          message:
+              'Methods cannot be invoked on a channel with multiple connections',
+        ),
+      );
+    }
     final receivePort = ReceivePort();
-    _sendPort.send(
-      IsolateMessage(name, method, arguments, receivePort.sendPort),
+    _connection.send(
+      MethodInvocation(name, method, arguments, receivePort.sendPort),
     );
     final result = await receivePort.first;
     receivePort.close();
@@ -36,12 +46,12 @@ class IsolateMethodChannel {
     }
   }
 
-  /// Invoke a method on the other isolate
+  /// Invoke a method on the target isolate
   Future<T> invokeMethod<T>(String method, [dynamic arguments]) {
     return _invokeMethod<T>(method, arguments: arguments);
   }
 
-  /// Invoke a method on the other isolate and return a list
+  /// Invoke a method on the target isolate and return a list
   Future<List<T>> invokeListMethod<T>(
     String method, [
     dynamic arguments,
@@ -50,7 +60,7 @@ class IsolateMethodChannel {
     return result.cast<T>();
   }
 
-  /// Invoke a method on the other isolate and return a map
+  /// Invoke a method on the target isolate and return a map
   Future<Map<K, V>> invokeMapMethod<K, V>(
     String method, [
     dynamic arguments,
@@ -59,16 +69,16 @@ class IsolateMethodChannel {
     return result.cast<K, V>();
   }
 
-  /// Set a handler to receive method calls from the other isolate
+  /// Set a handler to receive method invocations from connected isolates
   void setMethodCallHandler(
     void Function(IsolateMethodCall call, IsolateResult result)? handler,
   ) {
     _handlerSubscription?.cancel();
     if (handler == null) return;
 
-    _handlerSubscription = _receivePort
-        .where((message) => message is IsolateMessage && message.name == name)
-        .cast<IsolateMessage>()
+    _handlerSubscription = _connection.receive
+        .where((message) => message is MethodInvocation && message.name == name)
+        .cast<MethodInvocation>()
         .listen((message) {
           handler.call(
             IsolateMethodCall(message.method, message.arguments),

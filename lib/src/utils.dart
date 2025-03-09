@@ -1,44 +1,58 @@
 import 'dart:isolate';
 
+import 'package:isolate_channel/isolate_channel.dart';
+import 'package:isolate_channel/src/model/internal/connection_message.dart';
+
 /// Helper function to spawn an isolate that supports channel communication
-Future<(SendPort, Stream, void Function())> spawnIsolate<T>(
+Future<IsolateConnection> spawnIsolate<T>(
   void Function(SendPort message) entryPoint,
 ) async {
   final receivePort = ReceivePort();
-  final receive = receivePort.asBroadcastStream();
   final isolate = await Isolate.spawn(entryPoint, receivePort.sendPort);
+  final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
   void shutdown() {
     receivePort.close();
     isolate.kill();
   }
 
-  return (send, receive, shutdown);
+  return IsolateConnection(
+    owner: true,
+    send: send,
+    receive: receive,
+    shutdown: shutdown,
+  );
 }
 
 /// Helper function to set up an isolate for channel communication
-Stream setupIsolate(SendPort sendPort) {
+IsolateConnection setupIsolate(SendPort send) {
   final receivePort = ReceivePort();
-  sendPort.send(receivePort.sendPort);
+  send.send(receivePort.sendPort);
   final receive = receivePort.asBroadcastStream();
-  receive
-      .where((message) => message is SendPort)
-      .cast<SendPort>()
-      .listen((sendPort) => sendPort.send(receivePort.sendPort));
-  return receive;
+  final shutdown = receivePort.close;
+
+  return IsolateConnection(
+    owner: false,
+    send: send,
+    receive: receive,
+    shutdown: shutdown,
+  );
 }
 
 /// Helper function to connect to an existing isolate
-Future<(SendPort, Stream, void Function())> connectToIsolate(
-  SendPort sendPort,
-) async {
+Future<IsolateConnection> connectToIsolate(SendPort send) async {
   final receivePort = ReceivePort();
-  sendPort.send(receivePort.sendPort);
+  send.send(IsolateConnect(receivePort.sendPort));
   final receive = receivePort.asBroadcastStream();
-  final send = await receive.first as SendPort;
   void shutdown() {
+    send.send(IsolateDisconnect(receivePort.sendPort));
     receivePort.close();
   }
 
-  return (send, receive, shutdown);
+  return IsolateConnection(
+    owner: true,
+    send: send,
+    receive: receive,
+    shutdown: shutdown,
+  );
 }

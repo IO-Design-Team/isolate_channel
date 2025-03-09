@@ -1,7 +1,7 @@
 import 'dart:isolate';
 
-/// A message sent from one isolate to another
-class IsolateMessage {
+/// A method invocation message
+class MethodInvocation {
   /// The name of the channel sending the message
   final String name;
 
@@ -15,5 +15,5 @@ class IsolateMessage {
   final SendPort sendPort;
 
   /// Constructor
-  const IsolateMessage(this.name, this.method, this.arguments, this.sendPort);
+  const MethodInvocation(this.name, this.method, this.arguments, this.sendPort);
 }

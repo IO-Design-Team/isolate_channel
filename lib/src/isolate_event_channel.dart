@@ -7,17 +7,22 @@ import 'package:isolate_channel/isolate_channel.dart';
 class IsolateEventChannel {
   /// The name of the channel
   final String name;
-  final SendPort _sendPort;
-  final Stream _receivePort;
+  final IsolateConnection _connection;
 
   /// Constructor
-  IsolateEventChannel(this.name, this._sendPort, this._receivePort);
+  const IsolateEventChannel(this.name, this._connection);
 
   /// Receive a broadcast stream of events from the isolate
   ///
   /// To be called from the isolate receiving events
   Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
-    final methodChannel = IsolateMethodChannel(name, _sendPort, _receivePort);
+    if (!_connection.owner) {
+      throw IsolateException(
+        code: 'not_owner',
+        message: 'Only the channel owner can receive events',
+      );
+    }
+    final methodChannel = IsolateMethodChannel(name, _connection);
     late StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(
       onListen: () async {
@@ -47,8 +52,15 @@ class IsolateEventChannel {
   ///
   /// To be called from the isolate sending events
   void setStreamHandler(IsolateStreamHandler? handler) {
+    if (_connection.owner) {
+      throw IsolateException(
+        code: 'owner',
+        message: 'The channel owner cannot send events',
+      );
+    }
+
     if (handler == null) return;
-    final methodChannel = IsolateMethodChannel(name, _sendPort, _receivePort);
+    final methodChannel = IsolateMethodChannel(name, _connection);
     methodChannel.setMethodCallHandler((call, result) {
       switch (call.method) {
         case 'listen':
@@ -125,19 +137,4 @@ class IsolateEventSink {
 
   /// Send an end of stream event.
   void endOfStream() => _channel.invokeMethod('', null);
-}
-
-/// An exception thrown by the isolate
-class IsolateException {
-  /// The code of the exception
-  final String code;
-
-  /// The message of the exception
-  final String? message;
-
-  /// The details of the exception
-  final Object? details;
-
-  /// Constructor
-  const IsolateException({required this.code, this.message, this.details});
 }
