@@ -12,7 +12,19 @@ void main() async {
   group('event channel', () {
     test('listen', () {
       final stream = channel.receiveBroadcastStream();
-      expect(stream, emitsInOrder(['Hello', emitsDone]));
+      expect(
+        stream,
+        emitsInOrder([
+          'Hello',
+          emitsError(
+            isA<IsolateException>()
+                .having((e) => e.code, 'code', 'code')
+                .having((e) => e.message, 'message', 'message')
+                .having((e) => e.details, 'details', 'details'),
+          ),
+          emitsDone,
+        ]),
+      );
     });
   });
 }
@@ -25,6 +37,7 @@ void isolateEntryPoint(SendPort send) {
     IsolateStreamHandler.inline(
       onListen: (arguments, events) {
         events.success('Hello');
+        events.error(code: 'code', message: 'message', details: 'details');
         events.endOfStream();
       },
       onCancel: (arguments) => print('onCancel: $arguments'),
