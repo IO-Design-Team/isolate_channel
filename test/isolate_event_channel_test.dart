@@ -32,16 +32,7 @@ void main() async {
 
     test('owner issues', () {
       IsolateEventChannel createChannel(bool owner) {
-        final receive = ReceivePort();
-        final send = receive.sendPort;
-
-        final connection = IsolateConnection(
-          owner: owner,
-          send: send,
-          receive: receive,
-          shutdown: () {},
-        );
-        return IsolateEventChannel('', connection);
+        return IsolateEventChannel('', createConnection(owner: owner));
       }
 
       expect(

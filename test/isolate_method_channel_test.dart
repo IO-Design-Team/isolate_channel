@@ -67,6 +67,22 @@ void main() async {
         ),
       );
     });
+
+    test('multiple connections', () {
+      IsolateMethodChannel createChannel(int connections) {
+        return IsolateMethodChannel(
+          '',
+          createConnection(connections: connections),
+        );
+      }
+
+      expect(() => createChannel(1).invokeMethod('', ''), returnsNormally);
+
+      expect(
+        () => createChannel(2).invokeMethod('', ''),
+        throwsA(isAIsolateException(code: 'multiple_connections')),
+      );
+    });
   });
 }
 
