@@ -23,20 +23,20 @@ class IsolateConnection {
     required SendPort send,
     required this.receive,
     required void Function() shutdown,
-  }) : _sendPorts = {send},
-       _shutdown = shutdown {
+  })  : _sendPorts = {send},
+        _shutdown = shutdown {
     // Handle new connections
     _subscription = receive
         .where((message) => message is ConnectionMessage)
         .cast<ConnectionMessage>()
         .listen((message) {
-          switch (message) {
-            case IsolateConnect():
-              _sendPorts.add(message.sendPort);
-            case IsolateDisconnect():
-              _sendPorts.remove(message.sendPort);
-          }
-        });
+      switch (message) {
+        case IsolateConnect():
+          _sendPorts.add(message.sendPort);
+        case IsolateDisconnect():
+          _sendPorts.remove(message.sendPort);
+      }
+    });
   }
 
   /// Send a message to all connected isolates

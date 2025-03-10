@@ -73,8 +73,10 @@ class IsolateEventChannel {
 }
 
 /// Typedef for the inline onListen callback
-typedef IsolateStreamHandlerOnListen =
-    void Function(dynamic arguments, IsolateEventSink events);
+typedef IsolateStreamHandlerOnListen = void Function(
+  dynamic arguments,
+  IsolateEventSink events,
+);
 
 /// Typedef for the inline onCancel callback
 typedef IsolateStreamHandlerOnCancel = void Function(dynamic arguments);
@@ -94,7 +96,8 @@ abstract class IsolateStreamHandler {
   factory IsolateStreamHandler.inline({
     required IsolateStreamHandlerOnListen onListen,
     IsolateStreamHandlerOnCancel? onCancel,
-  }) => _InlineIsolateStreamHandler(onListen: onListen, onCancel: onCancel);
+  }) =>
+      _InlineIsolateStreamHandler(onListen: onListen, onCancel: onCancel);
 }
 
 class _InlineIsolateStreamHandler extends IsolateStreamHandler {
@@ -104,8 +107,8 @@ class _InlineIsolateStreamHandler extends IsolateStreamHandler {
   _InlineIsolateStreamHandler({
     required IsolateStreamHandlerOnListen onListen,
     IsolateStreamHandlerOnCancel? onCancel,
-  }) : _onListenInline = onListen,
-       _onCancelInline = onCancel;
+  })  : _onListenInline = onListen,
+        _onCancelInline = onCancel;
 
   @override
   void onListen(dynamic arguments, IsolateEventSink events) =>

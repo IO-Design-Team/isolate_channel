@@ -81,10 +81,10 @@ class IsolateMethodChannel {
         .where((message) => message is MethodInvocation && message.name == name)
         .cast<MethodInvocation>()
         .listen((message) async {
-          final result = await handler.call(
-            IsolateMethodCall(message.method, message.arguments),
-          );
-          message.sendPort.send(result);
-        });
+      final result = await handler.call(
+        IsolateMethodCall(message.method, message.arguments),
+      );
+      message.sendPort.send(result);
+    });
   }
 }

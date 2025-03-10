@@ -14,9 +14,9 @@ class IsolateException {
 
   /// Constructor for a not implemented exception
   const IsolateException.notImplemented(String method)
-    : code = 'not_implemented',
-      message = 'Method $method not implemented',
-      details = null;
+      : code = 'not_implemented',
+        message = 'Method $method not implemented',
+        details = null;
 
   @override
   String toString() =>
