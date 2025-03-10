@@ -4,9 +4,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
-import 'dart:isolate' as _i4;
 
-import 'package:isolate_channel/isolate_channel.dart' as _i2;
+import 'package:isolate_channel/src/model/isolate_connection.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
 
 // ignore_for_file: type=lint
@@ -53,18 +52,6 @@ class MockIsolateConnection extends _i1.Mock implements _i2.IsolateConnection {
             returnValueForMissingStub: 0,
           )
           as int);
-
-  @override
-  bool registerPortWithName(
-    String? name,
-    bool Function(_i4.SendPort, String)? register,
-  ) =>
-      (super.noSuchMethod(
-            Invocation.method(#registerPortWithName, [name, register]),
-            returnValue: false,
-            returnValueForMissingStub: false,
-          )
-          as bool);
 
   @override
   void send(Object? message) => super.noSuchMethod(

@@ -16,12 +16,11 @@ void main() {
     });
 
     test('connect to isolate', () async {
-      final connection1 = await spawnIsolate(isolate1EntryPoint);
       late final SendPort send;
-      connection1.registerPortWithName('test', (port, name) {
-        send = port;
-        return true;
-      });
+      final connection1 = await spawnIsolate(
+        isolate1EntryPoint,
+        onConnect: (port) => send = port,
+      );
       final connection2 = await spawnIsolate(isolate2EntryPoint);
       connection2.send(send);
       expect(
