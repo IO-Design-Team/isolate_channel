@@ -12,10 +12,15 @@ typedef IsolateEntryPoint = void Function(SendPort send);
 /// [IsolateNameService]
 Future<IsolateConnection> spawnIsolate<T>(
   IsolateEntryPoint entryPoint, {
+  String? debugName,
   void Function(SendPort send)? onConnect,
 }) async {
   final receivePort = ReceivePort();
-  final isolate = await Isolate.spawn(entryPoint, receivePort.sendPort);
+  final isolate = await Isolate.spawn(
+    entryPoint,
+    receivePort.sendPort,
+    debugName: debugName,
+  );
   final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
   onConnect?.call(send);
