@@ -3,10 +3,11 @@ import 'dart:isolate';
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/connection_message.dart';
 
+/// The entry point of an isolate
+typedef IsolateEntryPoint = void Function(SendPort send);
+
 /// Helper function to spawn an isolate that supports channel communication
-Future<IsolateConnection> spawnIsolate<T>(
-  void Function(SendPort message) entryPoint,
-) async {
+Future<IsolateConnection> spawnIsolate<T>(IsolateEntryPoint entryPoint) async {
   final receivePort = ReceivePort();
   final isolate = await Isolate.spawn(entryPoint, receivePort.sendPort);
   final receive = receivePort.asBroadcastStream();
