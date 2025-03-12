@@ -24,11 +24,10 @@ class IsolateEventChannel {
         message: 'Only the channel owner can receive events',
       );
     }
-    final methodChannel = IsolateMethodChannel(name, _connection);
     late StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(
       onListen: () async {
-        methodChannel.setMethodCallHandler((call) {
+        _channel.setMethodCallHandler((call) {
           final reply = call.arguments;
           if (call.method == 'endOfStream') {
             controller.close();
@@ -39,11 +38,11 @@ class IsolateEventChannel {
           }
         });
 
-        await methodChannel.invokeMethod<void>('listen', arguments);
+        await _channel.invokeMethod<void>('listen', arguments);
       },
       onCancel: () async {
-        methodChannel.setMethodCallHandler(null);
-        await methodChannel.invokeMethod<void>('cancel', arguments);
+        _channel.setMethodCallHandler(null);
+        await _channel.invokeMethod<void>('cancel', arguments);
       },
     );
     return controller.stream;
