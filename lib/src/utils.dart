@@ -5,7 +5,7 @@ extension StreamExtension on Stream {
   /// Filter the stream for method invocations for a channel [name]
   Stream<MethodInvocation> methodInvocations(String name) {
     return where(
-      (message) => message is MethodInvocation && message.name == name,
+      (message) => message is MethodInvocation && message.channel == name,
     ).cast<MethodInvocation>();
   }
 }

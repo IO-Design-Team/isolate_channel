@@ -3,7 +3,7 @@ import 'dart:isolate';
 /// A method invocation message
 class MethodInvocation {
   /// The name of the channel sending the message
-  final String name;
+  final String channel;
 
   /// The method to invoke
   final String method;
@@ -17,5 +17,10 @@ class MethodInvocation {
   final SendPort? sendPort;
 
   /// Constructor
-  const MethodInvocation(this.name, this.method, this.arguments, this.sendPort);
+  const MethodInvocation(
+    this.channel,
+    this.method,
+    this.arguments,
+    this.sendPort,
+  );
 }
