@@ -109,7 +109,7 @@ class _InlineIsolateStreamHandler extends IsolateStreamHandler {
   final IsolateStreamHandlerOnListen _onListen;
   final IsolateStreamHandlerOnCancel? _onCancel;
 
-  _InlineIsolateStreamHandler(
+  const _InlineIsolateStreamHandler(
     IsolateStreamHandlerOnListen onListen,
     IsolateStreamHandlerOnCancel? onCancel,
   )   : _onListen = onListen,
