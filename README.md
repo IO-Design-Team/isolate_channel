@@ -80,4 +80,3 @@ Pass an isolate's send port to the `connectToIsolate` function to connect to it.
 ```dart
 final connection = await connectToIsolate(send);
 ```
-
