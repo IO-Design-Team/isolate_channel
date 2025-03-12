@@ -18,7 +18,10 @@ void main() {
               events.success('Hello');
               events.success(null);
               events.error(
-                  code: 'code', message: 'message', details: 'details');
+                code: 'code',
+                message: 'message',
+                details: 'details',
+              );
               events.endOfStream();
             },
             onCancel: (arguments) => print('onCancel: $arguments'),
