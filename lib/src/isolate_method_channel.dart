@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/method_invocation.dart';
+import 'package:isolate_channel/src/utils.dart';
 
 /// A handler for method invocations
 typedef MethodCallHandler = FutureOr<dynamic> Function(IsolateMethodCall call);
@@ -77,10 +78,8 @@ class IsolateMethodChannel {
     _handlerSubscription?.cancel();
     if (handler == null) return;
 
-    _handlerSubscription = _connection.receive
-        .where((message) => message is MethodInvocation && message.name == name)
-        .cast<MethodInvocation>()
-        .listen((message) async {
+    _handlerSubscription =
+        _connection.receive.methodInvocations(name).listen((message) async {
       final result = await handler.call(
         IsolateMethodCall(message.method, message.arguments),
       );
