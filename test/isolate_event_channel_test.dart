@@ -30,30 +30,6 @@ void main() async {
         ]),
       );
     });
-
-    test('owner issues', () {
-      IsolateEventChannel createChannel(bool owner) {
-        return IsolateEventChannel('', createConnection(owner: owner));
-      }
-
-      expect(
-        () => createChannel(true).receiveBroadcastStream(),
-        returnsNormally,
-      );
-      expect(
-        () => createChannel(false).receiveBroadcastStream(),
-        throwsA(isAIsolateException(code: 'not_owner')),
-      );
-
-      expect(
-        () => createChannel(true).setStreamHandler(null),
-        throwsA(isAIsolateException(code: 'owner')),
-      );
-      expect(
-        () => createChannel(false).setStreamHandler(null),
-        returnsNormally,
-      );
-    });
   });
 }
 

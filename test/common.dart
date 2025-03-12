@@ -22,11 +22,9 @@ Matcher isAIsolateException({
 }
 
 MockIsolateConnection createConnection({
-  bool owner = true,
   int connections = 1,
 }) {
   final connection = MockIsolateConnection();
-  when(connection.owner).thenReturn(owner);
   when(connection.connections).thenReturn(connections);
   return connection;
 }

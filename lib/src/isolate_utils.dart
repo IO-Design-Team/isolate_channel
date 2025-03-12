@@ -40,12 +40,8 @@ Future<IsolateConnection> spawnIsolate<T>(
     isolate.kill();
   }
 
-  final connection = IsolateConnection(
-    owner: true,
-    send: send,
-    receive: receive,
-    close: close,
-  );
+  final connection =
+      IsolateConnection(send: send, receive: receive, close: close);
 
   late final StreamSubscription controlSubscription;
   controlSubscription = controlPort.listen((message) {
@@ -72,12 +68,7 @@ IsolateConnection setupIsolate(SendPort send) {
   final receive = receivePort.asBroadcastStream();
   final close = receivePort.close;
 
-  return IsolateConnection(
-    owner: false,
-    send: send,
-    receive: receive,
-    close: close,
-  );
+  return IsolateConnection(send: send, receive: receive, close: close);
 }
 
 /// Helper function to connect to an existing isolate
@@ -90,10 +81,5 @@ IsolateConnection connectToIsolate(SendPort send) {
     receivePort.close();
   }
 
-  return IsolateConnection(
-    owner: true,
-    send: send,
-    receive: receive,
-    close: close,
-  );
+  return IsolateConnection(send: send, receive: receive, close: close);
 }

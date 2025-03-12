@@ -27,35 +27,32 @@ import 'package:mockito/mockito.dart' as _i1;
 /// See the documentation for Mockito's code generation for more information.
 class MockIsolateConnection extends _i1.Mock implements _i2.IsolateConnection {
   @override
-  bool get owner => (super.noSuchMethod(
-        Invocation.getter(#owner),
-        returnValue: false,
-        returnValueForMissingStub: false,
-      ) as bool);
+  _i3.Stream<dynamic> get receive =>
+      (super.noSuchMethod(
+            Invocation.getter(#receive),
+            returnValue: _i3.Stream<dynamic>.empty(),
+            returnValueForMissingStub: _i3.Stream<dynamic>.empty(),
+          )
+          as _i3.Stream<dynamic>);
 
   @override
-  _i3.Stream<dynamic> get receive => (super.noSuchMethod(
-        Invocation.getter(#receive),
-        returnValue: _i3.Stream<dynamic>.empty(),
-        returnValueForMissingStub: _i3.Stream<dynamic>.empty(),
-      ) as _i3.Stream<dynamic>);
-
-  @override
-  int get connections => (super.noSuchMethod(
-        Invocation.getter(#connections),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  int get connections =>
+      (super.noSuchMethod(
+            Invocation.getter(#connections),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
   void send(Object? message) => super.noSuchMethod(
-        Invocation.method(#send, [message]),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#send, [message]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void close() => super.noSuchMethod(
-        Invocation.method(#close, []),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#close, []),
+    returnValueForMissingStub: null,
+  );
 }

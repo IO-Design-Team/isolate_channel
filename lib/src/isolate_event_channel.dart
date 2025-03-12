@@ -27,12 +27,6 @@ class IsolateEventChannel {
   ///
   /// To be called from the isolate receiving events
   Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
-    if (!_connection.owner) {
-      throw IsolateException(
-        code: 'not_owner',
-        message: 'Only the channel owner can receive events',
-      );
-    }
     late final StreamController controller;
     late final StreamSubscription subscription;
     controller = StreamController<dynamic>.broadcast(
@@ -63,13 +57,6 @@ class IsolateEventChannel {
   ///
   /// To be called from the isolate sending events
   void setStreamHandler(IsolateStreamHandler? handler) {
-    if (_connection.owner) {
-      throw IsolateException(
-        code: 'owner',
-        message: 'The channel owner cannot send events',
-      );
-    }
-
     _handlerSubscription?.cancel();
     if (handler == null) return;
 

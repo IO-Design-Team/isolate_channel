@@ -6,8 +6,6 @@ import 'package:isolate_channel/src/utils.dart';
 
 /// A connection between isolates
 class IsolateConnection {
-  /// If this connection was initiated by this isolate
-  final bool owner;
   final Set<SendPort> _sendPorts;
 
   /// Number of connections to this isolate
@@ -20,7 +18,6 @@ class IsolateConnection {
 
   /// Constructor
   IsolateConnection({
-    required this.owner,
     required SendPort send,
     required this.receive,
     required void Function() close,
