@@ -39,19 +39,17 @@ void main() async {
       expect(channel.invokeMethod<Object?>('return_null'), completes);
       expect(
         channel.invokeMethod<Object>('return_null'),
-        throwsA(isAIsolateException(code: 'unexpected_result')),
+        throwsIsolateException(code: 'unexpected_result'),
       );
     });
 
     test('error result', () {
       expect(
         channel.invokeMethod('return_error'),
-        throwsA(
-          isAIsolateException(
-            code: 'code',
-            message: 'message',
-            details: 'details',
-          ),
+        throwsIsolateException(
+          code: 'code',
+          message: 'message',
+          details: 'details',
         ),
       );
     });
@@ -59,11 +57,9 @@ void main() async {
     test('not implemented', () {
       expect(
         channel.invokeMethod('not_implemented'),
-        throwsA(
-          isAIsolateException(
-            code: 'not_implemented',
-            message: contains('not_implemented'),
-          ),
+        throwsIsolateException(
+          code: 'not_implemented',
+          message: contains('not_implemented'),
         ),
       );
     });
@@ -80,7 +76,7 @@ void main() async {
 
       expect(
         () => createChannel(2).invokeMethod('', ''),
-        throwsA(isAIsolateException(code: 'multiple_connections')),
+        throwsIsolateException(code: 'multiple_connections'),
       );
     });
   });
@@ -88,12 +84,10 @@ void main() async {
   test('method throws exception', () {
     expect(
       channel.invokeMethod('throw_exception'),
-      throwsA(
-        isAIsolateException(
-          code: 'unhandled_exception',
-          message: contains('test#throw_exception'),
-          details: contains('oops'),
-        ),
+      throwsIsolateException(
+        code: 'unhandled_exception',
+        message: contains('test#throw_exception'),
+        details: contains('oops'),
       ),
     );
   });

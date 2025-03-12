@@ -21,6 +21,16 @@ Matcher isAIsolateException({
   return matcher;
 }
 
+Matcher throwsIsolateException({
+  required Object code,
+  Object? message,
+  Object? details,
+}) {
+  return throwsA(
+    isAIsolateException(code: code, message: message, details: details),
+  );
+}
+
 MockIsolateConnection createConnection({
   int connections = 1,
 }) {

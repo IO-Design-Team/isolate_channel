@@ -69,12 +69,10 @@ void main() {
 
       expect(
         channel.receiveBroadcastStream().drain(),
-        throwsA(
-          isAIsolateException(
-            code: 'unhandled_exception',
-            message: contains('test#listen'),
-            details: contains('oops'),
-          ),
+        throwsIsolateException(
+          code: 'unhandled_exception',
+          message: contains('test#listen'),
+          details: contains('oops'),
         ),
       );
     });
