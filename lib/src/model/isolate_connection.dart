@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/src/model/internal/connection_message.dart';
+import 'package:isolate_channel/src/utils.dart';
 
 /// A connection between isolates
 class IsolateConnection {
@@ -26,10 +27,7 @@ class IsolateConnection {
   })  : _sendPorts = {send},
         _close = close {
     // Handle new connections
-    _subscription = receive
-        .where((message) => message is ConnectionMessage)
-        .cast<ConnectionMessage>()
-        .listen((message) {
+    _subscription = receive.whereType<ConnectionMessage>().listen((message) {
       switch (message) {
         case IsolateConnect():
           _sendPorts.add(message.sendPort);
