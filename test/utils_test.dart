@@ -43,11 +43,13 @@ void main() {
     test('onExit', () async {
       final completer = Completer<void>();
 
-      try {
-        await spawnIsolate((_) {}, onExit: completer.complete);
-      } catch (_) {
-        // This is expected
-      }
+      await spawnIsolate(
+        (send) {
+          setupIsolate(send);
+          Isolate.current.kill();
+        },
+        onExit: completer.complete,
+      );
 
       expect(completer.future, completes);
     });
@@ -56,16 +58,15 @@ void main() {
       final exitCompleter = Completer<void>();
       final errorCompleter = Completer<(String, StackTrace)>();
 
-      try {
-        await spawnIsolate(
-          (_) => throw 1234,
-          onExit: exitCompleter.complete,
-          onError: (error, stackTrace) =>
-              errorCompleter.complete((error, stackTrace)),
-        );
-      } catch (_) {
-        // This is expected
-      }
+      await spawnIsolate(
+        (send) {
+          setupIsolate(send);
+          throw 1234;
+        },
+        onExit: exitCompleter.complete,
+        onError: (error, stackTrace) =>
+            errorCompleter.complete((error, stackTrace)),
+      );
 
       expect(exitCompleter.future, completes);
 
