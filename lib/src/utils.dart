@@ -17,7 +17,7 @@ Future<IsolateConnection> spawnIsolate<T>(
   bool errorsAreFatal = true,
   void Function(SendPort send)? onConnect,
   void Function()? onExit,
-  void Function(Object error, StackTrace stackTrace)? onError,
+  void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
 }) async {
   final receivePort = ReceivePort();
@@ -33,7 +33,7 @@ Future<IsolateConnection> spawnIsolate<T>(
       onExit?.call();
     } else {
       // This is an error message
-      onError?.call(message[0], message[1]);
+      onError?.call(message[0], StackTrace.fromString(message[1]));
     }
   });
 

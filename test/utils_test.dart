@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
@@ -37,6 +38,40 @@ void main() {
       connection2.shutdown();
       await connection1.receive.first;
       connection1.shutdown();
+    });
+
+    test('onExit', () async {
+      final completer = Completer<void>();
+
+      try {
+        await spawnIsolate((_) {}, onExit: completer.complete);
+      } catch (_) {
+        // This is expected
+      }
+
+      expect(completer.future, completes);
+    });
+
+    test('onError', () async {
+      final exitCompleter = Completer<void>();
+      final errorCompleter = Completer<(String, StackTrace)>();
+
+      try {
+        await spawnIsolate(
+          (_) => throw 1234,
+          onExit: exitCompleter.complete,
+          onError: (error, stackTrace) =>
+              errorCompleter.complete((error, stackTrace)),
+        );
+      } catch (_) {
+        // This is expected
+      }
+
+      expect(exitCompleter.future, completes);
+
+      final (error, stackTrace) = await errorCompleter.future;
+      expect(error, '1234');
+      expect(stackTrace.toString(), isNotEmpty);
     });
   });
 }
