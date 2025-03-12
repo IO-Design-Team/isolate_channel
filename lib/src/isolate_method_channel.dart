@@ -84,7 +84,7 @@ class IsolateMethodChannel {
       final result = await handler.call(
         IsolateMethodCall(message.method, message.arguments),
       );
-      message.sendPort.send(result);
+      message.sendPort?.send(result);
     });
   }
 }

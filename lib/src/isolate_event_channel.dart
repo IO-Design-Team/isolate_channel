@@ -2,17 +2,24 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
+import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
   /// The name of the channel
   final String name;
   final IsolateConnection _connection;
-  final IsolateMethodChannel _channel;
+  StreamSubscription? _handlerSubscription;
 
   /// Constructor
-  IsolateEventChannel(this.name, this._connection)
-      : _channel = IsolateMethodChannel(name, _connection);
+  IsolateEventChannel(this.name, this._connection);
+
+  Future<void> _invokeMethod(String method, [dynamic arguments]) {
+    final receivePort = ReceivePort();
+    _connection
+        .send(MethodInvocation(name, method, arguments, receivePort.sendPort));
+    return receivePort.first;
+  }
 
   /// Receive a broadcast stream of events from the isolate
   ///
@@ -24,12 +31,18 @@ class IsolateEventChannel {
         message: 'Only the channel owner can receive events',
       );
     }
-    late StreamController<dynamic> controller;
+    late final StreamController controller;
+    late final StreamSubscription subscription;
     controller = StreamController<dynamic>.broadcast(
       onListen: () async {
-        _channel.setMethodCallHandler((call) {
-          final reply = call.arguments;
-          if (call.method == 'endOfStream') {
+        subscription = _connection.receive
+            .where(
+              (message) => message is MethodInvocation && message.name == name,
+            )
+            .cast<MethodInvocation>()
+            .listen((message) {
+          final reply = message.arguments;
+          if (message.method == 'endOfStream') {
             controller.close();
           } else if (reply is IsolateException) {
             controller.addError(reply);
@@ -38,11 +51,11 @@ class IsolateEventChannel {
           }
         });
 
-        await _channel.invokeMethod<void>('listen', arguments);
+        await _invokeMethod('listen', arguments);
       },
       onCancel: () async {
-        _channel.setMethodCallHandler(null);
-        await _channel.invokeMethod<void>('cancel', arguments);
+        unawaited(subscription.cancel());
+        await _invokeMethod('cancel', arguments);
       },
     );
     return controller.stream;
@@ -59,19 +72,26 @@ class IsolateEventChannel {
       );
     }
 
-    if (handler == null) {
-      _channel.setMethodCallHandler(null);
-      return;
-    }
+    _handlerSubscription?.cancel();
+    if (handler == null) return;
 
-    _channel.setMethodCallHandler((call) {
-      switch (call.method) {
+    _handlerSubscription = _connection.receive
+        .where(
+          (message) => message is MethodInvocation && message.name == name,
+        )
+        .cast<MethodInvocation>()
+        .listen((message) {
+      switch (message.method) {
         case 'listen':
-          handler.onListen(call.arguments, IsolateEventSink(_channel));
+          handler.onListen(
+            message.arguments,
+            IsolateEventSink(name, _connection),
+          );
         case 'cancel':
-          handler.onCancel(call.arguments);
-          _channel.setMethodCallHandler(null);
+          handler.onCancel(message.arguments);
+          _handlerSubscription?.cancel();
       }
+      message.sendPort?.send(null);
     });
   }
 }
@@ -125,20 +145,25 @@ class _InlineIsolateStreamHandler extends IsolateStreamHandler {
 /// A sink for sending events to the stream
 class IsolateEventSink {
   /// Create a new [IsolateEventSink] with the given [SendPort].
-  IsolateEventSink(this._channel);
+  IsolateEventSink(this._channelName, this._connection);
 
-  final IsolateMethodChannel _channel;
+  final String _channelName;
+  final IsolateConnection _connection;
+
+  void _sendEvent(String method, [dynamic arguments]) {
+    _connection.send(MethodInvocation(_channelName, method, arguments, null));
+  }
 
   /// Send a success event.
-  void success(Object? event) => _channel.invokeMethod('', event);
+  void success(Object? event) => _sendEvent('', event);
 
   /// Send an error event.
   void error({required String code, String? message, Object? details}) =>
-      _channel.invokeMethod(
+      _sendEvent(
         '',
         IsolateException(code: code, message: message, details: details),
       );
 
   /// Send an end of stream event.
-  void endOfStream() => _channel.invokeMethod('endOfStream');
+  void endOfStream() => _sendEvent('endOfStream');
 }

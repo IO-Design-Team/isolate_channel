@@ -12,7 +12,9 @@ class MethodInvocation {
   final dynamic arguments;
 
   /// The port to respond to
-  final SendPort sendPort;
+  ///
+  /// If null, the method is not expected to respond
+  final SendPort? sendPort;
 
   /// Constructor
   const MethodInvocation(this.name, this.method, this.arguments, this.sendPort);
