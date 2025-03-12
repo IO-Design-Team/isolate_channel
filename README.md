@@ -1,3 +1,5 @@
+# isolate_channel
+
 Communication channels for isolates based on Flutter's plugin channels
 
 ## Features
@@ -63,4 +65,10 @@ Now you can use the channels to communicate
 ```dart
 final result = await methodChannel.invokeMethod('example_method', 'Hello');
 final stream = eventChannel.receiveBroadcastStream();
+```
+
+And shut down the connection when you're done
+
+```dart
+connection.shutdown();
 ```
