@@ -80,9 +80,15 @@ class IsolateMethodChannel {
 
     _handlerSubscription =
         _connection.receive.methodInvocations(name).listen((message) async {
-      final result =
-          await handler(IsolateMethodCall(message.method, message.arguments));
-      message.sendPort?.send(result);
+      try {
+        final result =
+            await handler(IsolateMethodCall(message.method, message.arguments));
+        message.sendPort?.send(result);
+      } catch (error, stackTrace) {
+        message.sendPort?.send(
+          IsolateException.unhandled(name, message.method, error, stackTrace),
+        );
+      }
     });
   }
 }

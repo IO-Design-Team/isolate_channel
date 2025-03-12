@@ -18,6 +18,16 @@ class IsolateException {
         message = 'Method $method not implemented',
         details = null;
 
+  /// Constructor for an unhandled exception
+  IsolateException.unhandled(
+    String channel,
+    String method,
+    Object error,
+    StackTrace stackTrace,
+  )   : code = 'unhandled_exception',
+        message = 'Unhandled exception in $channel#$method',
+        details = [error.toString(), stackTrace.toString()];
+
   @override
   String toString() =>
       'IsolateException(code: $code, message: $message, details: $details)';

@@ -84,6 +84,19 @@ void main() async {
       );
     });
   });
+
+  test('method throws exception', () {
+    expect(
+      channel.invokeMethod('throw_exception'),
+      throwsA(
+        isAIsolateException(
+          code: 'unhandled_exception',
+          message: contains('test#throw_exception'),
+          details: contains('oops'),
+        ),
+      ),
+    );
+  });
 }
 
 void isolateEntryPoint(SendPort send) {
@@ -104,6 +117,8 @@ void isolateEntryPoint(SendPort send) {
           message: 'message',
           details: 'details',
         );
+      case 'throw_exception':
+        throw 'oops';
       default:
         return IsolateException.notImplemented(call.method);
     }
