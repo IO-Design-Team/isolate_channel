@@ -34,7 +34,7 @@ void main() {
         ]),
       );
       // Wait for the messages to be received
-      await connection1.receive.take(2).toList();
+      await connection1.receive.take(2).drain();
       connection2.shutdown();
       await connection1.receive.first;
       connection1.shutdown();

@@ -28,7 +28,7 @@ class IsolateEventChannel {
       onListen: () async {
         methodChannel.setMethodCallHandler((call) {
           final reply = call.arguments;
-          if (reply == null) {
+          if (call.method == 'endOfStream') {
             controller.close();
           } else if (reply is IsolateException) {
             controller.addError(reply);
@@ -136,5 +136,5 @@ class IsolateEventSink {
       );
 
   /// Send an end of stream event.
-  void endOfStream() => _channel.invokeMethod('', null);
+  void endOfStream() => _channel.invokeMethod('endOfStream');
 }
