@@ -1,5 +1,6 @@
 name: isolate_channel
 description: Communication channels for isolates based on Flutter's plugin channels
+homepage: https://github.com/IO-Design-Team/isolate_channel
 version: 0.1.0
 
 environment:
