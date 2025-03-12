@@ -15,12 +15,16 @@ class IsolateEventChannel {
   /// Constructor
   IsolateEventChannel(this.name, this._connection);
 
-  Future<void> _invokeMethod(String method, [dynamic arguments]) async {
+  Future<IsolateException?> _invokeMethod(
+    String method, [
+    dynamic arguments,
+  ]) async {
     final receivePort = ReceivePort();
     _connection
         .send(MethodInvocation(name, method, arguments, receivePort.sendPort));
-    await receivePort.first;
+    final result = await receivePort.first as IsolateException?;
     receivePort.close();
+    return result;
   }
 
   /// Receive a broadcast stream of events from the isolate
@@ -43,10 +47,12 @@ class IsolateEventChannel {
           }
         });
 
-        await _invokeMethod('listen', arguments);
+        final error = await _invokeMethod('listen', arguments);
+        if (error != null) controller.addError(error);
       },
       onCancel: () async {
         unawaited(subscription.cancel());
+        // We can't send the error anywhere because the stream is already closed
         await _invokeMethod('cancel', arguments);
       },
     );
@@ -62,17 +68,23 @@ class IsolateEventChannel {
 
     _handlerSubscription =
         _connection.receive.methodInvocations(name).listen((message) {
-      switch (message.method) {
-        case 'listen':
-          handler.onListen(
-            message.arguments,
-            IsolateEventSink(name, _connection),
-          );
-        case 'cancel':
-          handler.onCancel(message.arguments);
-          _handlerSubscription?.cancel();
+      try {
+        switch (message.method) {
+          case 'listen':
+            handler.onListen(
+              message.arguments,
+              IsolateEventSink(name, _connection),
+            );
+          case 'cancel':
+            handler.onCancel(message.arguments);
+            _handlerSubscription?.cancel();
+        }
+        message.sendPort?.send(null);
+      } catch (error, stackTrace) {
+        message.sendPort?.send(
+          IsolateException.unhandled(name, message.method, error, stackTrace),
+        );
       }
-      message.sendPort?.send(null);
     });
   }
 }

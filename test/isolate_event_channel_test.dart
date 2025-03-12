@@ -5,14 +5,31 @@ import 'package:test/test.dart';
 
 import 'common.dart';
 
-void main() async {
-  final connection = await spawnIsolate(isolateEntryPoint);
-  final channel = IsolateEventChannel('test', connection);
-
-  tearDownAll(connection.close);
-
+void main() {
   group('event channel', () {
-    test('listen', () {
+    test('listen', () async {
+      void isolateEntryPoint(SendPort send) {
+        final connection = setupIsolate(send);
+
+        final channel = IsolateEventChannel('test', connection);
+        channel.setStreamHandler(
+          IsolateStreamHandler.inline(
+            onListen: (arguments, events) {
+              events.success('Hello');
+              events.success(null);
+              events.error(
+                  code: 'code', message: 'message', details: 'details');
+              events.endOfStream();
+            },
+            onCancel: (arguments) => print('onCancel: $arguments'),
+          ),
+        );
+      }
+
+      final connection = await spawnIsolate(isolateEntryPoint);
+      addTearDown(connection.close);
+      final channel = IsolateEventChannel('test', connection);
+
       final stream = channel.receiveBroadcastStream();
       expect(
         stream,
@@ -30,22 +47,33 @@ void main() async {
         ]),
       );
     });
+
+    test('onListen throws exception', () async {
+      void isolateEntryPoint(SendPort send) {
+        final connection = setupIsolate(send);
+
+        final channel = IsolateEventChannel('test', connection);
+        channel.setStreamHandler(
+          IsolateStreamHandler.inline(
+            onListen: (_, __) => throw 'oops',
+          ),
+        );
+      }
+
+      final connection = await spawnIsolate(isolateEntryPoint);
+      addTearDown(connection.close);
+      final channel = IsolateEventChannel('test', connection);
+
+      expect(
+        channel.receiveBroadcastStream().drain(),
+        throwsA(
+          isAIsolateException(
+            code: 'unhandled_exception',
+            message: contains('test#listen'),
+            details: contains('oops'),
+          ),
+        ),
+      );
+    });
   });
-}
-
-void isolateEntryPoint(SendPort send) {
-  final connection = setupIsolate(send);
-
-  final channel = IsolateEventChannel('test', connection);
-  channel.setStreamHandler(
-    IsolateStreamHandler.inline(
-      onListen: (arguments, events) {
-        events.success('Hello');
-        events.success(null);
-        events.error(code: 'code', message: 'message', details: 'details');
-        events.endOfStream();
-      },
-      onCancel: (arguments) => print('onCancel: $arguments'),
-    ),
-  );
 }
