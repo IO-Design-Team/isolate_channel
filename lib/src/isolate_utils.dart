@@ -10,7 +10,7 @@ typedef IsolateEntryPoint = void Function(SendPort send);
 /// Helper function to spawn an isolate that supports channel communication
 ///
 /// [onConnect] can be used to register the [SendPort] with an
-/// [IsolateNameService]
+/// [IsolateNameServer]
 Future<IsolateConnection> spawnIsolate<T>(
   IsolateEntryPoint entryPoint, {
   bool paused = false,
