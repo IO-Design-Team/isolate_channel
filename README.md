@@ -67,7 +67,7 @@ final result = await methodChannel.invokeMethod('example_method', 'Hello');
 final stream = eventChannel.receiveBroadcastStream();
 ```
 
-And shut down the connection when you're done
+And close the connection when you're done
 
 ```dart
 connection.close();
