@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
@@ -11,10 +12,14 @@ void main() async {
   final result = await methodChannel.invokeMethod('example_method', 'Hello');
   print(result);
 
-  final stream = eventChannel.receiveBroadcastStream();
-  stream.listen(print);
+  final stream = eventChannel.receiveBroadcastStream('Hello');
+  final subscription = stream.listen(print);
+  subscription.onError(print);
 
-  await stream.drain();
+  final completer = Completer<void>();
+  subscription.onDone(completer.complete);
+  await completer.future;
+
   connection.shutdown();
 }
 
@@ -44,7 +49,7 @@ void isolateEntryPoint(SendPort send) {
         );
         sink.endOfStream();
       },
-      onCancel: (arguments) => print('Canceled $arguments'),
+      onCancel: (arguments) => print('Canceled: $arguments'),
     ),
   );
 }
