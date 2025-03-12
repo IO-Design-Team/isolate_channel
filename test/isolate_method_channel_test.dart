@@ -9,7 +9,7 @@ void main() async {
   final connection = await spawnIsolate(isolateEntryPoint);
   final channel = IsolateMethodChannel('test', connection);
 
-  tearDownAll(connection.shutdown);
+  tearDownAll(connection.close);
 
   group('method channel', () {
     test('invoke method', () async {

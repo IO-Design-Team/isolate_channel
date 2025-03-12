@@ -70,7 +70,7 @@ final stream = eventChannel.receiveBroadcastStream();
 And shut down the connection when you're done
 
 ```dart
-connection.shutdown();
+connection.close();
 ```
 
 ## Connect to a running isolate

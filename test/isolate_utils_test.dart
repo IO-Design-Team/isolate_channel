@@ -13,7 +13,7 @@ void main() {
       connection.send('Hello');
       // Wait for the message to be received
       await connection.receive.first;
-      connection.shutdown();
+      connection.close();
     });
 
     test('connect to isolate', () async {
@@ -35,9 +35,9 @@ void main() {
       );
       // Wait for the messages to be received
       await connection1.receive.take(2).drain();
-      connection2.shutdown();
+      connection2.close();
       await connection1.receive.first;
-      connection1.shutdown();
+      connection1.close();
     });
 
     test('onExit', () async {
@@ -87,5 +87,5 @@ void isolate2EntryPoint(SendPort send) async {
   final send2 = await connection1.receive.first;
   final connection2 = connectToIsolate(send2);
   connection2.send('Hello');
-  connection2.shutdown();
+  connection2.close();
 }

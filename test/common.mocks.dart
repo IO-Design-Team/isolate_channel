@@ -54,8 +54,8 @@ class MockIsolateConnection extends _i1.Mock implements _i2.IsolateConnection {
       );
 
   @override
-  void shutdown() => super.noSuchMethod(
-        Invocation.method(#shutdown, []),
+  void close() => super.noSuchMethod(
+        Invocation.method(#close, []),
         returnValueForMissingStub: null,
       );
 }

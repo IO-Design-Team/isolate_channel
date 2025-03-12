@@ -14,7 +14,7 @@ class IsolateConnection {
 
   /// Stream of messages from other isolates
   final Stream receive;
-  final void Function() _shutdown;
+  final void Function() _close;
   late final StreamSubscription _subscription;
 
   /// Constructor
@@ -22,9 +22,9 @@ class IsolateConnection {
     required this.owner,
     required SendPort send,
     required this.receive,
-    required void Function() shutdown,
+    required void Function() close,
   })  : _sendPorts = {send},
-        _shutdown = shutdown {
+        _close = close {
     // Handle new connections
     _subscription = receive
         .where((message) => message is ConnectionMessage)
@@ -46,9 +46,9 @@ class IsolateConnection {
     }
   }
 
-  /// Shutdown the connection
-  void shutdown() {
+  /// Close the connection
+  void close() {
     _subscription.cancel();
-    _shutdown();
+    _close();
   }
 }

@@ -35,7 +35,7 @@ Future<IsolateConnection> spawnIsolate<T>(
   final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
   onConnect?.call(send);
-  void shutdown() {
+  void close() {
     receivePort.close();
     isolate.kill();
   }
@@ -44,7 +44,7 @@ Future<IsolateConnection> spawnIsolate<T>(
     owner: true,
     send: send,
     receive: receive,
-    shutdown: shutdown,
+    close: close,
   );
 
   late final StreamSubscription controlSubscription;
@@ -53,7 +53,7 @@ Future<IsolateConnection> spawnIsolate<T>(
       // This is an exit message
       receivePort.close();
       controlPort.close();
-      connection.shutdown();
+      connection.close();
       controlSubscription.cancel();
       onExit?.call();
     } else {
@@ -70,13 +70,13 @@ IsolateConnection setupIsolate(SendPort send) {
   final receivePort = ReceivePort();
   send.send(receivePort.sendPort);
   final receive = receivePort.asBroadcastStream();
-  final shutdown = receivePort.close;
+  final close = receivePort.close;
 
   return IsolateConnection(
     owner: false,
     send: send,
     receive: receive,
-    shutdown: shutdown,
+    close: close,
   );
 }
 
@@ -85,7 +85,7 @@ IsolateConnection connectToIsolate(SendPort send) {
   final receivePort = ReceivePort();
   send.send(IsolateConnect(receivePort.sendPort));
   final receive = receivePort.asBroadcastStream();
-  void shutdown() {
+  void close() {
     send.send(IsolateDisconnect(receivePort.sendPort));
     receivePort.close();
   }
@@ -94,6 +94,6 @@ IsolateConnection connectToIsolate(SendPort send) {
     owner: true,
     send: send,
     receive: receive,
-    shutdown: shutdown,
+    close: close,
   );
 }

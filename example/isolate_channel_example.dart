@@ -20,7 +20,7 @@ void main() async {
   subscription.onDone(completer.complete);
   await completer.future;
 
-  connection.shutdown();
+  connection.close();
 }
 
 void isolateEntryPoint(SendPort send) {

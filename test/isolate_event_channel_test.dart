@@ -9,7 +9,7 @@ void main() async {
   final connection = await spawnIsolate(isolateEntryPoint);
   final channel = IsolateEventChannel('test', connection);
 
-  tearDownAll(connection.shutdown);
+  tearDownAll(connection.close);
 
   group('event channel', () {
     test('listen', () {
