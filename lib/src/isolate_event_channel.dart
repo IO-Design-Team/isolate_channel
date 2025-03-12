@@ -15,11 +15,12 @@ class IsolateEventChannel {
   /// Constructor
   IsolateEventChannel(this.name, this._connection);
 
-  Future<void> _invokeMethod(String method, [dynamic arguments]) {
+  Future<void> _invokeMethod(String method, [dynamic arguments]) async {
     final receivePort = ReceivePort();
     _connection
         .send(MethodInvocation(name, method, arguments, receivePort.sendPort));
-    return receivePort.first;
+    await receivePort.first;
+    receivePort.close();
   }
 
   /// Receive a broadcast stream of events from the isolate
