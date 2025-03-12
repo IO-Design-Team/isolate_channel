@@ -72,3 +72,12 @@ And shut down the connection when you're done
 ```dart
 connection.shutdown();
 ```
+
+## Connect to a running isolate
+
+Pass an isolate's send port to the `connectToIsolate` function to connect to it. A send port can be retrieved from an [IsolateNameServer](https://api.flutter.dev/flutter/dart-ui/IsolateNameServer-class.html).
+
+```dart
+final connection = await connectToIsolate(send);
+```
+
