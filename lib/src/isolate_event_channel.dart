@@ -102,34 +102,34 @@ abstract class IsolateStreamHandler {
     required IsolateStreamHandlerOnListen onListen,
     IsolateStreamHandlerOnCancel? onCancel,
   }) =>
-      _InlineIsolateStreamHandler(onListen: onListen, onCancel: onCancel);
+      _InlineIsolateStreamHandler(onListen, onCancel);
 }
 
 class _InlineIsolateStreamHandler extends IsolateStreamHandler {
-  final IsolateStreamHandlerOnListen _onListenInline;
-  final IsolateStreamHandlerOnCancel? _onCancelInline;
+  final IsolateStreamHandlerOnListen _onListen;
+  final IsolateStreamHandlerOnCancel? _onCancel;
 
-  _InlineIsolateStreamHandler({
-    required IsolateStreamHandlerOnListen onListen,
+  _InlineIsolateStreamHandler(
+    IsolateStreamHandlerOnListen onListen,
     IsolateStreamHandlerOnCancel? onCancel,
-  })  : _onListenInline = onListen,
-        _onCancelInline = onCancel;
+  )   : _onListen = onListen,
+        _onCancel = onCancel;
 
   @override
   void onListen(dynamic arguments, IsolateEventSink events) =>
-      _onListenInline(arguments, events);
+      _onListen(arguments, events);
 
   @override
-  void onCancel(dynamic arguments) => _onCancelInline?.call(arguments);
+  void onCancel(dynamic arguments) => _onCancel?.call(arguments);
 }
 
 /// A sink for sending events to the stream
 class IsolateEventSink {
-  /// Create a new [IsolateEventSink] with the given [SendPort].
-  IsolateEventSink(this._channelName, this._connection);
-
   final String _channelName;
   final IsolateConnection _connection;
+
+  /// Constructor
+  const IsolateEventSink(this._channelName, this._connection);
 
   void _sendEvent(String method, [dynamic arguments]) {
     _connection.send(MethodInvocation(_channelName, method, arguments, null));
