@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
@@ -12,13 +13,37 @@ typedef IsolateEntryPoint = void Function(SendPort send);
 /// [IsolateNameService]
 Future<IsolateConnection> spawnIsolate<T>(
   IsolateEntryPoint entryPoint, {
-  String? debugName,
+  bool paused = false,
+  bool errorsAreFatal = true,
   void Function(SendPort send)? onConnect,
+  void Function()? onExit,
+  void Function(Object error, StackTrace stackTrace)? onError,
+  String? debugName,
 }) async {
   final receivePort = ReceivePort();
+  final controlPort = ReceivePort();
+
+  late final StreamSubscription controlSubscription;
+  controlSubscription = controlPort.listen((message) {
+    if (message == null) {
+      // This is an exit message
+      receivePort.close();
+      controlPort.close();
+      controlSubscription.cancel();
+      onExit?.call();
+    } else {
+      // This is an error message
+      onError?.call(message[0], message[1]);
+    }
+  });
+
   final isolate = await Isolate.spawn(
     entryPoint,
     receivePort.sendPort,
+    paused: paused,
+    errorsAreFatal: errorsAreFatal,
+    onExit: controlPort.sendPort,
+    onError: controlPort.sendPort,
     debugName: debugName,
   );
   final receive = receivePort.asBroadcastStream();
