@@ -23,20 +23,6 @@ Future<IsolateConnection> spawnIsolate<T>(
   final receivePort = ReceivePort();
   final controlPort = ReceivePort();
 
-  late final StreamSubscription controlSubscription;
-  controlSubscription = controlPort.listen((message) {
-    if (message == null) {
-      // This is an exit message
-      receivePort.close();
-      controlPort.close();
-      controlSubscription.cancel();
-      onExit?.call();
-    } else {
-      // This is an error message
-      onError?.call(message[0], StackTrace.fromString(message[1]));
-    }
-  });
-
   final isolate = await Isolate.spawn(
     entryPoint,
     receivePort.sendPort,
@@ -54,12 +40,29 @@ Future<IsolateConnection> spawnIsolate<T>(
     isolate.kill();
   }
 
-  return IsolateConnection(
+  final connection = IsolateConnection(
     owner: true,
     send: send,
     receive: receive,
     shutdown: shutdown,
   );
+
+  late final StreamSubscription controlSubscription;
+  controlSubscription = controlPort.listen((message) {
+    if (message == null) {
+      // This is an exit message
+      receivePort.close();
+      controlPort.close();
+      connection.shutdown();
+      controlSubscription.cancel();
+      onExit?.call();
+    } else {
+      // This is an error message
+      onError?.call(message[0], StackTrace.fromString(message[1]));
+    }
+  });
+
+  return connection;
 }
 
 /// Helper function to set up an isolate for channel communication
