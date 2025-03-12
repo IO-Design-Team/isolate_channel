@@ -18,6 +18,7 @@ void main() async {
         stream,
         emitsInOrder([
           'Hello',
+          null,
           emitsError(
             isAIsolateException(
               code: 'code',
@@ -64,6 +65,7 @@ void isolateEntryPoint(SendPort send) {
     IsolateStreamHandler.inline(
       onListen: (arguments, events) {
         events.success('Hello');
+        events.success(null);
         events.error(code: 'code', message: 'message', details: 'details');
         events.endOfStream();
       },
