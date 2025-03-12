@@ -8,9 +8,11 @@ class IsolateEventChannel {
   /// The name of the channel
   final String name;
   final IsolateConnection _connection;
+  final IsolateMethodChannel _channel;
 
   /// Constructor
-  const IsolateEventChannel(this.name, this._connection);
+  IsolateEventChannel(this.name, this._connection)
+      : _channel = IsolateMethodChannel(name, _connection);
 
   /// Receive a broadcast stream of events from the isolate
   ///
@@ -58,15 +60,18 @@ class IsolateEventChannel {
       );
     }
 
-    if (handler == null) return;
-    final methodChannel = IsolateMethodChannel(name, _connection);
-    methodChannel.setMethodCallHandler((call) {
+    if (handler == null) {
+      _channel.setMethodCallHandler(null);
+      return;
+    }
+
+    _channel.setMethodCallHandler((call) {
       switch (call.method) {
         case 'listen':
-          handler.onListen(call.arguments, IsolateEventSink(methodChannel));
+          handler.onListen(call.arguments, IsolateEventSink(_channel));
         case 'cancel':
           handler.onCancel(call.arguments);
-          methodChannel.setMethodCallHandler(null);
+          _channel.setMethodCallHandler(null);
       }
     });
   }
