@@ -1,6 +1,6 @@
 name: isolate_channel
-description: A starting point for Dart libraries or applications.
-version: 1.0.0
+description: Communication channels for isolates based on Flutter's plugin channels
+version: 0.1.0
 
 environment:
   sdk: ^3.4.0
