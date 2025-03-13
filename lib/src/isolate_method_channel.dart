@@ -35,8 +35,9 @@ class IsolateMethodChannel {
     );
     final result = await receivePort.first;
     receivePort.close();
-    if (result is IsolateException) {
-      return Future.error(result);
+    final error = IsolateException.fromJson(result);
+    if (error != null) {
+      return Future.error(error);
     } else if (result is T) {
       return result;
     } else {
@@ -80,12 +81,16 @@ class IsolateMethodChannel {
     _handlerSubscription =
         _connection.methodInvocations(name).listen((message) async {
       try {
-        final result =
+        var result =
             await handler(IsolateMethodCall(message.method, message.arguments));
+        if (result is IsolateException) {
+          result = result.toJson();
+        }
         message.sendPort?.send(result);
       } catch (error, stackTrace) {
         message.sendPort?.send(
-          IsolateException.unhandled(name, message.method, error, stackTrace),
+          IsolateException.unhandled(name, message.method, error, stackTrace)
+              .toJson(),
         );
       }
     });

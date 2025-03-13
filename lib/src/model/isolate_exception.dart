@@ -1,5 +1,7 @@
 /// An exception returned by an isolate
 class IsolateException {
+  static const _identifier = 'isolate_channel.IsolateException';
+
   /// The code of the exception
   final String code;
 
@@ -32,15 +34,17 @@ class IsolateException {
   String toString() =>
       'IsolateException(code: $code, message: $message, details: $details)';
 
-  Map<String, dynamic> toJson() {
-    return {
-      'code': code,
-      'message': message,
-      'details': details,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'identifier': _identifier,
+        'code': code,
+        'message': message,
+        'details': details,
+      };
 
-  factory IsolateException.fromJson(Map<String, dynamic> json) {
+  static IsolateException? fromJson(Object? json) {
+    if (json == null || json is! Map || json['identifier'] != _identifier) {
+      return null;
+    }
     return IsolateException(
       code: json['code'],
       message: json['message'],

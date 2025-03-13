@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
@@ -37,4 +39,15 @@ MockIsolateConnection createConnection({
   final connection = MockIsolateConnection();
   when(connection.connections).thenReturn(connections);
   return connection;
+}
+
+Future<IsolateConnection> spawn({
+  void Function(SendPort)? entryPoint,
+  String? uri,
+}) {
+  assert(entryPoint != null || uri != null);
+  if (entryPoint != null) {
+    return spawnIsolate(entryPoint);
+  }
+  return spawnUriIsolate(Uri.parse(uri!));
 }
