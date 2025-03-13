@@ -29,9 +29,9 @@ class IsolateConnection {
     _subscription = methodInvocations(_channel).listen((message) {
       switch (message.method) {
         case 'connect':
-          _sendPorts.add(message.sendPort!);
+          _sendPorts.add(message.arguments);
         case 'disconnect':
-          _sendPorts.remove(message.sendPort);
+          _sendPorts.remove(message.arguments);
       }
     });
   }
