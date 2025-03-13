@@ -2,36 +2,21 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/model/internal/connection_message.dart';
 
 /// The entry point of an isolate
 typedef IsolateEntryPoint = void Function(SendPort send);
 
-/// Helper function to spawn an isolate that supports channel communication
-///
-/// [onConnect] can be used to register the [SendPort] with an
-/// [IsolateNameServer]
-Future<IsolateConnection> spawnIsolate<T>(
-  IsolateEntryPoint entryPoint, {
-  bool paused = false,
-  bool errorsAreFatal = true,
+Future<IsolateConnection> _spawnIsolate({
   void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
-  String? debugName,
+  required Future<Isolate> Function(ReceivePort, ReceivePort) spawn,
 }) async {
   final receivePort = ReceivePort();
   final controlPort = ReceivePort();
 
-  final isolate = await Isolate.spawn(
-    entryPoint,
-    receivePort.sendPort,
-    paused: paused,
-    errorsAreFatal: errorsAreFatal,
-    onExit: controlPort.sendPort,
-    onError: controlPort.sendPort,
-    debugName: debugName,
-  );
+  final isolate = await spawn(receivePort, controlPort);
+
   final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
   onConnect?.call(send);
@@ -61,25 +46,86 @@ Future<IsolateConnection> spawnIsolate<T>(
   return connection;
 }
 
+/// Helper function to spawn an isolate that supports channel communication
+///
+/// [onConnect] can be used to register the [SendPort] with an
+/// [IsolateNameServer]
+Future<IsolateConnection> spawnIsolate<T>(
+  IsolateEntryPoint entryPoint, {
+  bool paused = false,
+  bool errorsAreFatal = true,
+  void Function(SendPort send)? onConnect,
+  void Function()? onExit,
+  void Function(String error, StackTrace stackTrace)? onError,
+  String? debugName,
+}) {
+  return _spawnIsolate(
+    onConnect: onConnect,
+    onExit: onExit,
+    onError: onError,
+    spawn: (receivePort, controlPort) => Isolate.spawn(
+      entryPoint,
+      receivePort.sendPort,
+      paused: paused,
+      errorsAreFatal: errorsAreFatal,
+      onExit: controlPort.sendPort,
+      onError: controlPort.sendPort,
+      debugName: debugName,
+    ),
+  );
+}
+
+/// Helper function to spawn an isolate by URI
+Future<IsolateConnection> spawnUriIsolate<T>(
+  Uri uri, {
+  bool paused = false,
+  bool errorsAreFatal = true,
+  void Function(SendPort send)? onConnect,
+  void Function()? onExit,
+  void Function(String error, StackTrace stackTrace)? onError,
+  String? debugName,
+}) {
+  return _spawnIsolate(
+    onConnect: onConnect,
+    onExit: onExit,
+    onError: onError,
+    spawn: (receivePort, controlPort) => Isolate.spawnUri(
+      uri,
+      [],
+      receivePort.sendPort,
+      paused: paused,
+      errorsAreFatal: errorsAreFatal,
+      onExit: controlPort.sendPort,
+      onError: controlPort.sendPort,
+      debugName: debugName,
+    ),
+  );
+}
+
 /// Helper function to set up an isolate for channel communication
 IsolateConnection setupIsolate(SendPort send) {
   final receivePort = ReceivePort();
   send.send(receivePort.sendPort);
-  final receive = receivePort.asBroadcastStream();
-  final close = receivePort.close;
 
-  return IsolateConnection(send: send, receive: receive, close: close);
+  return IsolateConnection(
+    send: send,
+    receive: receivePort.asBroadcastStream(),
+    close: receivePort.close,
+  );
 }
 
 /// Helper function to connect to an existing isolate
 IsolateConnection connectToIsolate(SendPort send) {
   final receivePort = ReceivePort();
-  send.send(IsolateConnect(receivePort.sendPort));
   final receive = receivePort.asBroadcastStream();
+  late final IsolateConnection connection;
   void close() {
-    send.send(IsolateDisconnect(receivePort.sendPort));
+    connection.isolateDisconnected(receivePort.sendPort);
     receivePort.close();
   }
 
-  return IsolateConnection(send: send, receive: receive, close: close);
+  connection = IsolateConnection(send: send, receive: receive, close: close);
+  connection.isolateConnected(receivePort.sendPort);
+
+  return connection;
 }

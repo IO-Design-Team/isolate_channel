@@ -23,4 +23,22 @@ class MethodInvocation {
     this.arguments,
     this.sendPort,
   );
+
+  factory MethodInvocation.fromJson(Map<String, dynamic> json) {
+    return MethodInvocation(
+      json['channel'],
+      json['method'],
+      json['arguments'],
+      json['sendPort'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'channel': channel,
+      'method': method,
+      'arguments': arguments,
+      'sendPort': sendPort,
+    };
+  }
 }

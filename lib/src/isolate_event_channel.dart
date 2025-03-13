@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/method_invocation.dart';
-import 'package:isolate_channel/src/utils.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
@@ -35,8 +34,7 @@ class IsolateEventChannel {
     late final StreamSubscription subscription;
     controller = StreamController<dynamic>.broadcast(
       onListen: () async {
-        subscription =
-            _connection.receive.methodInvocations(name).listen((message) {
+        subscription = _connection.methodInvocations(name).listen((message) {
           final reply = message.arguments;
           if (message.method == 'endOfStream') {
             controller.close();
@@ -67,7 +65,7 @@ class IsolateEventChannel {
     if (handler == null) return;
 
     _handlerSubscription =
-        _connection.receive.methodInvocations(name).listen((message) {
+        _connection.methodInvocations(name).listen((message) {
       try {
         switch (message.method) {
           case 'listen':

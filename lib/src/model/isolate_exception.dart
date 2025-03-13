@@ -31,4 +31,20 @@ class IsolateException {
   @override
   String toString() =>
       'IsolateException(code: $code, message: $message, details: $details)';
+
+  Map<String, dynamic> toJson() {
+    return {
+      'code': code,
+      'message': message,
+      'details': details,
+    };
+  }
+
+  factory IsolateException.fromJson(Map<String, dynamic> json) {
+    return IsolateException(
+      code: json['code'],
+      message: json['message'],
+      details: json['details'],
+    );
+  }
 }

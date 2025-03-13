@@ -1,44 +1,58 @@
 import 'dart:async';
 import 'dart:isolate';
 
-import 'package:isolate_channel/src/model/internal/connection_message.dart';
-import 'package:isolate_channel/src/utils.dart';
+import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A connection between isolates
 class IsolateConnection {
+  static const _channel = 'isolate_channel.IsolateConnection';
+
   final Set<SendPort> _sendPorts;
 
   /// Number of connections to this isolate
   int get connections => _sendPorts.length;
 
-  /// Stream of messages from other isolates
-  final Stream receive;
+  /// Stream of method invocations from other isolates
+  final Stream<MethodInvocation> _receive;
   final void Function() _close;
   late final StreamSubscription _subscription;
 
   /// Constructor
   IsolateConnection({
     required SendPort send,
-    required this.receive,
+    required Stream receive,
     required void Function() close,
   })  : _sendPorts = {send},
+        _receive = receive.map((message) => MethodInvocation.fromJson(message)),
         _close = close {
     // Handle new connections
-    _subscription = receive.whereType<ConnectionMessage>().listen((message) {
-      switch (message) {
-        case IsolateConnect():
-          _sendPorts.add(message.sendPort);
-        case IsolateDisconnect():
+    _subscription = methodInvocations(_channel).listen((message) {
+      switch (message.method) {
+        case 'connect':
+          _sendPorts.add(message.sendPort!);
+        case 'disconnect':
           _sendPorts.remove(message.sendPort);
       }
     });
   }
 
   /// Send a message to all connected isolates
-  void send(Object? message) {
+  void send(MethodInvocation invocation) {
     for (final sendPort in _sendPorts) {
-      sendPort.send(message);
+      sendPort.send(invocation.toJson());
     }
+  }
+
+  Stream<MethodInvocation> methodInvocations(String channel) {
+    return _receive.where((message) => message.channel == channel);
+  }
+
+  void isolateConnected(SendPort sendPort) {
+    send(MethodInvocation(_channel, 'connect', sendPort, null));
+  }
+
+  void isolateDisconnected(SendPort sendPort) {
+    send(MethodInvocation(_channel, 'disconnect', sendPort, null));
   }
 
   /// Close the connection

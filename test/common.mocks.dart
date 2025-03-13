@@ -3,8 +3,11 @@
 // Do not manually edit this file.
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
-import 'dart:async' as _i3;
+import 'dart:async' as _i4;
+import 'dart:isolate' as _i5;
 
+import 'package:isolate_channel/src/model/internal/method_invocation.dart'
+    as _i3;
 import 'package:isolate_channel/src/model/isolate_connection.dart' as _i2;
 import 'package:mockito/mockito.dart' as _i1;
 
@@ -27,28 +30,44 @@ import 'package:mockito/mockito.dart' as _i1;
 /// See the documentation for Mockito's code generation for more information.
 class MockIsolateConnection extends _i1.Mock implements _i2.IsolateConnection {
   @override
-  _i3.Stream<dynamic> get receive => (super.noSuchMethod(
-        Invocation.getter(#receive),
-        returnValue: _i3.Stream<dynamic>.empty(),
-        returnValueForMissingStub: _i3.Stream<dynamic>.empty(),
-      ) as _i3.Stream<dynamic>);
+  int get connections =>
+      (super.noSuchMethod(
+            Invocation.getter(#connections),
+            returnValue: 0,
+            returnValueForMissingStub: 0,
+          )
+          as int);
 
   @override
-  int get connections => (super.noSuchMethod(
-        Invocation.getter(#connections),
-        returnValue: 0,
-        returnValueForMissingStub: 0,
-      ) as int);
+  void send(_i3.MethodInvocation? invocation) => super.noSuchMethod(
+    Invocation.method(#send, [invocation]),
+    returnValueForMissingStub: null,
+  );
 
   @override
-  void send(Object? message) => super.noSuchMethod(
-        Invocation.method(#send, [message]),
-        returnValueForMissingStub: null,
-      );
+  _i4.Stream<_i3.MethodInvocation> methodInvocations(String? channel) =>
+      (super.noSuchMethod(
+            Invocation.method(#methodInvocations, [channel]),
+            returnValue: _i4.Stream<_i3.MethodInvocation>.empty(),
+            returnValueForMissingStub: _i4.Stream<_i3.MethodInvocation>.empty(),
+          )
+          as _i4.Stream<_i3.MethodInvocation>);
+
+  @override
+  void isolateConnected(_i5.SendPort? sendPort) => super.noSuchMethod(
+    Invocation.method(#isolateConnected, [sendPort]),
+    returnValueForMissingStub: null,
+  );
+
+  @override
+  void isolateDisconnected(_i5.SendPort? sendPort) => super.noSuchMethod(
+    Invocation.method(#isolateDisconnected, [sendPort]),
+    returnValueForMissingStub: null,
+  );
 
   @override
   void close() => super.noSuchMethod(
-        Invocation.method(#close, []),
-        returnValueForMissingStub: null,
-      );
+    Invocation.method(#close, []),
+    returnValueForMissingStub: null,
+  );
 }
