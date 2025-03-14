@@ -1,38 +1,16 @@
-import 'dart:isolate';
-
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
 import 'common.dart';
+import 'entrypoint/event_channel.dart/events.dart';
+import 'entrypoint/event_channel.dart/throws.dart';
 
-void main() {
-  group('event channel', () {
-    test('listen', () async {
-      void isolateEntryPoint(SendPort send) {
-        final connection = setupIsolate(send);
+void main() async {
+  await testIsolateConnection(
+      eventsEntryPoint, 'event_channel.dart/events.dart', (connection) {
+    final channel = IsolateEventChannel('test', connection);
 
-        final channel = IsolateEventChannel('test', connection);
-        channel.setStreamHandler(
-          IsolateStreamHandler.inline(
-            onListen: (arguments, events) {
-              events.success('Hello');
-              events.success(null);
-              events.error(
-                code: 'code',
-                message: 'message',
-                details: 'details',
-              );
-              events.endOfStream();
-            },
-            onCancel: (arguments) => print('onCancel: $arguments'),
-          ),
-        );
-      }
-
-      final connection = await spawnIsolate(isolateEntryPoint);
-      addTearDown(connection.close);
-      final channel = IsolateEventChannel('test', connection);
-
+    test('event channel listen', () {
       final stream = channel.receiveBroadcastStream();
       expect(
         stream,
@@ -50,23 +28,12 @@ void main() {
         ]),
       );
     });
+  });
 
-    test('onListen throws exception', () async {
-      void isolateEntryPoint(SendPort send) {
-        final connection = setupIsolate(send);
-
-        final channel = IsolateEventChannel('test', connection);
-        channel.setStreamHandler(
-          IsolateStreamHandler.inline(
-            onListen: (_, __) => throw 'oops',
-          ),
-        );
-      }
-
-      final connection = await spawnIsolate(isolateEntryPoint);
-      addTearDown(connection.close);
-      final channel = IsolateEventChannel('test', connection);
-
+  await testIsolateConnection(
+      throwsEntryPoint, 'event_channel.dart/throws.dart', (connection) {
+    final channel = IsolateEventChannel('test', connection);
+    test('event channelonListen throws exception', () {
       expect(
         channel.receiveBroadcastStream().drain(),
         throwsIsolateException(

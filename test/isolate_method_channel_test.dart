@@ -5,7 +5,8 @@ import 'common.dart';
 import 'entrypoint/method_channel.dart';
 
 void main() async {
-  await testIsolateConnection(isolateEntryPoint, 'method_channel', (connection) {
+  await testIsolateConnection(isolateEntryPoint, 'method_channel.dart',
+      (connection) {
     final channel = IsolateMethodChannel('test', connection);
 
     group('method channel', () {

@@ -44,22 +44,20 @@ MockIsolateConnection createConnection({
 
 Future<IsolateConnection> spawn({
   void Function(SendPort)? entryPoint,
-  String? entryPointFileName,
+  String? entryPointFile,
 }) {
-  assert(entryPoint != null || entryPointFileName != null);
+  assert(entryPoint != null || entryPointFile != null);
   if (entryPoint != null) {
     return spawnIsolate(entryPoint);
   }
   return spawnUriIsolate(
-    Uri.file(
-      '${Directory.current.path}/test/entrypoint/$entryPointFileName.dart',
-    ),
+    Uri.file('${Directory.current.path}/test/entrypoint/$entryPointFile'),
   );
 }
 
 Future<void> testIsolateConnection(
   IsolateEntryPoint entryPoint,
-  String entryPointFileName,
+  String entryPointFile,
   void Function(IsolateConnection) test,
 ) async {
   final connection1 = await spawn(entryPoint: entryPoint);
@@ -69,7 +67,7 @@ Future<void> testIsolateConnection(
     test(connection1);
   });
 
-  final connection2 = await spawn(entryPointFileName: entryPointFileName);
+  final connection2 = await spawn(entryPointFile: entryPointFile);
   group('Isolate.spawnUri', () {
     tearDownAll(connection2.close);
     test(connection2);
