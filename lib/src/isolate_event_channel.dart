@@ -38,8 +38,12 @@ class IsolateEventChannel {
           final reply = message.arguments;
           if (message.method == 'endOfStream') {
             controller.close();
-          } else if (reply is IsolateException) {
-            controller.addError(reply);
+            return;
+          }
+
+          final error = IsolateException.fromJson(reply);
+          if (error != null) {
+            controller.addError(error);
           } else {
             controller.add(reply);
           }
@@ -80,7 +84,8 @@ class IsolateEventChannel {
         message.sendPort?.send(null);
       } catch (error, stackTrace) {
         message.sendPort?.send(
-          IsolateException.unhandled(name, message.method, error, stackTrace),
+          IsolateException.unhandled(name, message.method, error, stackTrace)
+              .toJson(),
         );
       }
     });

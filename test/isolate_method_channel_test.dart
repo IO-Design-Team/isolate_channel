@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import 'common.dart';
 
 void main() async {
-  final connection = await spawnIsolate(isolateEntryPoint);
+  final connection = await spawn(entryPointFileName: 'method_channel');
   final channel = IsolateMethodChannel('test', connection);
 
   tearDownAll(connection.close);

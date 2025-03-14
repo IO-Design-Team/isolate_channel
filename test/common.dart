@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
@@ -43,11 +44,15 @@ MockIsolateConnection createConnection({
 
 Future<IsolateConnection> spawn({
   void Function(SendPort)? entryPoint,
-  String? uri,
+  String? entryPointFileName,
 }) {
-  assert(entryPoint != null || uri != null);
+  assert(entryPoint != null || entryPointFileName != null);
   if (entryPoint != null) {
     return spawnIsolate(entryPoint);
   }
-  return spawnUriIsolate(Uri.parse(uri!));
+  return spawnUriIsolate(
+    Uri.file(
+      '${Directory.current.path}/test/entrypoint/$entryPointFileName.dart',
+    ),
+  );
 }
