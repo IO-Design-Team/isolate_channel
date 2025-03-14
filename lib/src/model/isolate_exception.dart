@@ -34,13 +34,9 @@ class IsolateException {
   String toString() =>
       'IsolateException(code: $code, message: $message, details: $details)';
 
-  Map<String, dynamic> toJson() => {
-        'identifier': _identifier,
-        'code': code,
-        'message': message,
-        'details': details,
-      };
-
+  /// From json
+  ///
+  /// Returns null if the json is invalid
   static IsolateException? fromJson(Object? json) {
     if (json == null || json is! Map || json['identifier'] != _identifier) {
       return null;
@@ -51,4 +47,12 @@ class IsolateException {
       details: json['details'],
     );
   }
+
+  /// To json
+  Map<String, dynamic> toJson() => {
+        'identifier': _identifier,
+        'code': code,
+        'message': message,
+        'details': details,
+      };
 }

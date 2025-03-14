@@ -24,6 +24,7 @@ class MethodInvocation {
     this.sendPort,
   );
 
+  /// From json
   factory MethodInvocation.fromJson(Map<String, dynamic> json) {
     return MethodInvocation(
       json['channel'],
@@ -33,6 +34,7 @@ class MethodInvocation {
     );
   }
 
+  /// To json
   Map<String, dynamic> toJson() {
     return {
       'channel': channel,

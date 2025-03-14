@@ -43,14 +43,17 @@ class IsolateConnection {
     }
   }
 
+  /// Stream of method invocations targeting [channel]
   Stream<MethodInvocation> methodInvocations(String channel) {
     return _receive.where((message) => message.channel == channel);
   }
 
+  /// Send a message to indicate this isolate has connected
   void isolateConnected(SendPort sendPort) {
     send(MethodInvocation(_channel, 'connect', sendPort, null));
   }
 
+  /// Send a message to indicate this isolate has disconnected
   void isolateDisconnected(SendPort sendPort) {
     send(MethodInvocation(_channel, 'disconnect', sendPort, null));
   }
