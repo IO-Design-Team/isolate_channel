@@ -21,9 +21,9 @@ class IsolateEventChannel {
     final receivePort = ReceivePort();
     _connection
         .send(MethodInvocation(name, method, arguments, receivePort.sendPort));
-    final result = await receivePort.first as IsolateException?;
+    final result = await receivePort.first;
     receivePort.close();
-    return result;
+    return IsolateException.fromJson(result);
   }
 
   /// Receive a broadcast stream of events from the isolate
@@ -157,7 +157,8 @@ class IsolateEventSink {
   void error({required String code, String? message, Object? details}) =>
       _sendEvent(
         '',
-        IsolateException(code: code, message: message, details: details),
+        IsolateException(code: code, message: message, details: details)
+            .toJson(),
       );
 
   /// Send an end of stream event.
