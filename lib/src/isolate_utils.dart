@@ -3,8 +3,11 @@ import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 
-/// The entry point of an isolate
+/// The entry point of an isolate spawned with [Isolate.spawn]
 typedef IsolateEntryPoint = void Function(SendPort send);
+
+/// The entry point of an isolate spawned with [Isolate.spawnUri]
+typedef UriIsolateEntryPoint = void Function(List<String> args, SendPort send);
 
 Future<IsolateConnection> _spawnIsolate({
   void Function(SendPort send)? onConnect,
