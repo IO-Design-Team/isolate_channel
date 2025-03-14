@@ -56,3 +56,22 @@ Future<IsolateConnection> spawn({
     ),
   );
 }
+
+Future<void> testIsolateConnection(
+  IsolateEntryPoint entryPoint,
+  String entryPointFileName,
+  void Function(IsolateConnection) test,
+) async {
+  final connection1 = await spawn(entryPoint: entryPoint);
+
+  group('Isolate.spawn', () {
+    tearDownAll(connection1.close);
+    test(connection1);
+  });
+
+  final connection2 = await spawn(entryPointFileName: entryPointFileName);
+  group('Isolate.spawnUri', () {
+    tearDownAll(connection2.close);
+    test(connection2);
+  });
+}
