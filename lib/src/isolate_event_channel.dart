@@ -6,6 +6,8 @@ import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
+  static const _endOfStream = 'isolate_channel.IsolateEventChannel#endOfStream';
+
   /// The name of the channel
   final String name;
   final IsolateConnection _connection;
@@ -14,48 +16,47 @@ class IsolateEventChannel {
   /// Constructor
   IsolateEventChannel(this.name, this._connection);
 
-  Future<IsolateException?> _invokeMethod(
-    String method, [
-    dynamic arguments,
-  ]) async {
-    final receivePort = ReceivePort();
-    _connection
-        .send(MethodInvocation(name, method, arguments, receivePort.sendPort));
-    final result = await receivePort.first;
-    receivePort.close();
-    return IsolateException.fromJson(result);
-  }
-
   /// Receive a broadcast stream of events from the isolate
   ///
   /// To be called from the isolate receiving events
   Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
+    final receivePort = ReceivePort();
+    final receive = receivePort.asBroadcastStream();
+
     late final StreamController controller;
-    late final StreamSubscription subscription;
+    StreamSubscription? subscription;
+
+    void close() {
+      controller.close();
+      subscription?.cancel();
+      receivePort.close();
+    }
+
     controller = StreamController<dynamic>.broadcast(
-      onListen: () async {
-        subscription = _connection.methodInvocations(name).listen((message) {
-          final reply = message.arguments;
-          if (message.method == 'endOfStream') {
-            controller.close();
+      onListen: () {
+        _connection.send(
+          MethodInvocation(name, 'listen', arguments, receivePort.sendPort),
+        );
+
+        subscription = receive.listen((event) {
+          if (event == _endOfStream) {
+            close();
             return;
           }
 
-          final error = IsolateException.fromJson(reply);
+          final error = IsolateException.fromJson(event);
           if (error != null) {
             controller.addError(error);
           } else {
-            controller.add(reply);
+            controller.add(event);
           }
         });
-
-        final error = await _invokeMethod('listen', arguments);
-        if (error != null) controller.addError(error);
       },
-      onCancel: () async {
-        unawaited(subscription.cancel());
-        // We can't send the error anywhere because the stream is already closed
-        await _invokeMethod('cancel', arguments);
+      onCancel: () {
+        close();
+        _connection.send(
+          MethodInvocation(name, 'cancel', arguments, receivePort.sendPort),
+        );
       },
     );
     return controller.stream;
@@ -75,13 +76,12 @@ class IsolateEventChannel {
           case 'listen':
             handler.onListen(
               message.arguments,
-              IsolateEventSink(name, _connection),
+              IsolateEventSink(message.sendPort!),
             );
           case 'cancel':
             handler.onCancel(message.arguments);
             _handlerSubscription?.cancel();
         }
-        message.sendPort?.send(null);
       } catch (error, stackTrace) {
         message.sendPort?.send(
           IsolateException.unhandled(name, message.method, error, stackTrace)
@@ -140,27 +140,21 @@ class _InlineIsolateStreamHandler extends IsolateStreamHandler {
 
 /// A sink for sending events to the stream
 class IsolateEventSink {
-  final String _channelName;
-  final IsolateConnection _connection;
+  final SendPort _send;
 
   /// Constructor
-  const IsolateEventSink(this._channelName, this._connection);
-
-  void _sendEvent(String method, [dynamic arguments]) {
-    _connection.send(MethodInvocation(_channelName, method, arguments, null));
-  }
+  const IsolateEventSink(this._send);
 
   /// Send a success event.
-  void success(Object? event) => _sendEvent('', event);
+  void success(Object event) => _send.send(event);
 
   /// Send an error event.
   void error({required String code, String? message, Object? details}) =>
-      _sendEvent(
-        '',
+      _send.send(
         IsolateException(code: code, message: message, details: details)
             .toJson(),
       );
 
   /// Send an end of stream event.
-  void endOfStream() => _sendEvent('endOfStream');
+  void endOfStream() => _send.send(IsolateEventChannel._endOfStream);
 }

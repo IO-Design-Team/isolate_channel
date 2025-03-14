@@ -16,7 +16,7 @@ void main() async {
         stream,
         emitsInOrder([
           'Hello',
-          null,
+          0,
           emitsError(
             isAIsolateException(
               code: 'code',
@@ -33,7 +33,7 @@ void main() async {
   await testIsolateConnection(
       throwsEntryPoint, 'event_channel.dart/throws.dart', (connection) {
     final channel = IsolateEventChannel('test', connection);
-    test('event channelonListen throws exception', () {
+    test('event channel onListen throws exception', () {
       expect(
         channel.receiveBroadcastStream().drain(),
         throwsIsolateException(
