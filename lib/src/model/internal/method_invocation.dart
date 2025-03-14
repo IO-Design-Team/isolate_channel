@@ -40,7 +40,7 @@ class MethodInvocation {
       'channel': channel,
       'method': method,
       'arguments': arguments,
-      'sendPort': sendPort,
+      if (sendPort != null) 'sendPort': sendPort,
     };
   }
 }

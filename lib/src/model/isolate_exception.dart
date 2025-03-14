@@ -52,7 +52,7 @@ class IsolateException {
   Map<String, dynamic> toJson() => {
         'identifier': _identifier,
         'code': code,
-        'message': message,
-        'details': details,
+        if (message != null) 'message': message,
+        if (details != null) 'details': details,
       };
 }
