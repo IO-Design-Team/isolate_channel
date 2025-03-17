@@ -3,7 +3,6 @@ import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/method_invocation.dart';
-import 'package:isolate_channel/src/utils.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {

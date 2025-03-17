@@ -61,3 +61,19 @@ class MethodInvocation {
   void unhandled(Object error, StackTrace stackTrace) =>
       result(IsolateException.unhandled(channel, method, error, stackTrace));
 }
+
+/// Extension on [Stream]
+extension StreamExtension on Stream {
+  /// Handle deserialization of invocation results
+  Stream<Object?> get mapResults => map((result) {
+        if (result == MethodInvocation.nullResult) {
+          return null;
+        }
+
+        final error = IsolateException.fromJson(result);
+        if (error != null) {
+          return error;
+        }
+        return result;
+      });
+}
