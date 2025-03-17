@@ -41,12 +41,10 @@ class IsolateConnection {
     String channel,
     String method,
     dynamic arguments, [
-    SendPort? sendPort,
+    SendPort? respond,
   ]) {
-    for (final sendPort in _sendPorts) {
-      sendPort.send(
-        MethodInvocation(channel, method, arguments, sendPort).toJson(),
-      );
+    for (final send in _sendPorts) {
+      send.send(MethodInvocation(channel, method, arguments, respond).toJson());
     }
   }
 

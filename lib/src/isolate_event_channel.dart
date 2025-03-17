@@ -72,7 +72,7 @@ class IsolateEventChannel {
           case 'listen':
             handler.onListen(
               invocation.arguments,
-              IsolateEventSink(invocation.sendPort!),
+              IsolateEventSink(invocation.respond!),
             );
           case 'cancel':
             handler.onCancel(invocation.arguments);
