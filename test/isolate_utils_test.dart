@@ -37,10 +37,11 @@ void main() {
         isolateEntryPoint,
         onConnect: (port) => send = port,
       );
-      final stream = connection1.methodInvocations(channel);
-      stream.listen((i) => print('channel: ${i.channel}, method: ${i.method}'));
+
       final connection2 = connectToIsolate(send);
       connection2.invoke(channel, 'Hello', null);
+
+      final stream = connection1.methodInvocations(channel);
       expect(
         stream,
         emitsInOrder([
@@ -50,6 +51,7 @@ void main() {
           emitsDone,
         ]),
       );
+
       // Wait for the messages to be received
       await stream.take(2).drain();
       connection2.close();
