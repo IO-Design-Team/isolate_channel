@@ -77,7 +77,7 @@ class IsolateEventChannel {
           case 'listen':
             handler.onListen(
               invocation.arguments,
-              IsolateEventSink(invocation.respond!),
+              IsolateEventSink(invocation),
             );
           case 'cancel':
             handler.onCancel(invocation.arguments);
@@ -138,22 +138,20 @@ class _InlineIsolateStreamHandler extends IsolateStreamHandler {
 
 /// A sink for sending events to the stream
 class IsolateEventSink {
-  final SendPort _send;
+  final MethodInvocation _invocation;
 
   /// Constructor
-  const IsolateEventSink(this._send);
+  const IsolateEventSink(this._invocation);
 
   /// Send a success event.
-  void success(Object? event) =>
-      _send.send(event ?? MethodInvocation.nullResult);
+  void success(Object? event) => _invocation.result(event);
 
   /// Send an error event.
   void error({required String code, String? message, Object? details}) =>
-      _send.send(
-        IsolateException(code: code, message: message, details: details)
-            .toJson(),
+      _invocation.result(
+        IsolateException(code: code, message: message, details: details),
       );
 
   /// Send an end of stream event.
-  void endOfStream() => _send.send(IsolateEventChannel._endOfStream);
+  void endOfStream() => _invocation.result(IsolateEventChannel._endOfStream);
 }

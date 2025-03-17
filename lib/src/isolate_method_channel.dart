@@ -84,14 +84,11 @@ class IsolateMethodChannel {
     _handlerSubscription =
         _connection.methodInvocations(name).listen((invocation) async {
       try {
-        var result = await handler(
+        final result = await handler(
           IsolateMethodCall(name, invocation.method, invocation.arguments),
         );
-        if (result is IsolateException) {
-          result = result.toJson();
-        }
 
-        invocation.result(result ?? MethodInvocation.nullResult);
+        invocation.result(result);
       } catch (error, stackTrace) {
         invocation.unhandled(error, stackTrace);
       }

@@ -19,14 +19,14 @@ class MethodInvocation {
   /// The port to respond to
   ///
   /// If null, the method is not expected to respond
-  final SendPort? respond;
+  final SendPort? _respond;
 
   /// Constructor
   const MethodInvocation(
     this.channel,
     this.method,
     this.arguments,
-    this.respond,
+    this._respond,
   );
 
   /// From json
@@ -45,15 +45,20 @@ class MethodInvocation {
       'channel': channel,
       'method': method,
       if (arguments != null) 'arguments': arguments,
-      if (respond != null) 'sendPort': respond,
+      if (_respond != null) 'sendPort': _respond,
     };
   }
 
   /// Respond with a result
-  void result(Object result) => respond?.send(result);
+  void result(Object? result) {
+    if (result is IsolateException) {
+      result = result.toJson();
+    }
+    _respond?.send(result ?? nullResult);
+  }
 
   /// Respond with an unhandled exception
-  void unhandled(Object error, StackTrace stackTrace) => respond?.send(
+  void unhandled(Object error, StackTrace stackTrace) => _respond?.send(
         IsolateException.unhandled(channel, method, error, stackTrace).toJson(),
       );
 }
