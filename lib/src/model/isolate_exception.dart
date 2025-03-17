@@ -15,9 +15,9 @@ class IsolateException {
   const IsolateException({required this.code, this.message, this.details});
 
   /// Constructor for a not implemented exception
-  const IsolateException.notImplemented(String method)
+  const IsolateException.notImplemented(String channel, String method)
       : code = 'not_implemented',
-        message = 'Method $method not implemented',
+        message = 'Method $channel#$method not implemented',
         details = null;
 
   /// Constructor for an unhandled exception

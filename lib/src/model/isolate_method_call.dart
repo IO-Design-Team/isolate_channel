@@ -1,5 +1,10 @@
+import 'package:isolate_channel/src/model/isolate_exception.dart';
+
 /// A method call from one isolate to another
 class IsolateMethodCall {
+  /// The name of the channel
+  final String _channel;
+
   /// The method to invoke
   final String method;
 
@@ -7,5 +12,9 @@ class IsolateMethodCall {
   final dynamic arguments;
 
   /// Constructor
-  const IsolateMethodCall(this.method, this.arguments);
+  const IsolateMethodCall(this._channel, this.method, this.arguments);
+
+  /// Return a not implemented exception
+  IsolateException notImplemented() =>
+      IsolateException.notImplemented(_channel, method);
 }

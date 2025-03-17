@@ -33,7 +33,7 @@ void isolateEntryPoint(SendPort send) {
         print(call.arguments);
         return 'World!';
       default:
-        return IsolateException.notImplemented(call.method);
+        return call.notImplemented();
     }
   });
 

@@ -26,7 +26,7 @@ void isolateEntryPoint(SendPort send) {
       case 'throw_exception':
         throw 'oops';
       default:
-        return IsolateException.notImplemented(call.method);
+        return call.notImplemented();
     }
   });
 }
