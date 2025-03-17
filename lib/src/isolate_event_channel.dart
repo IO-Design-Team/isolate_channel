@@ -2,12 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
+import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
-  static const _endOfStream =
-      '_isolate_channel.IsolateEventChannel#endOfStream';
-
   /// The name of the channel
   final String name;
   final IsolateConnection _connection;
@@ -37,7 +35,7 @@ class IsolateEventChannel {
         _connection.invoke(name, 'listen', arguments, receivePort.sendPort);
 
         subscription = receive.listen((event) {
-          if (event == _endOfStream) {
+          if (event == MethodInvocation.nullResult) {
             close();
             return;
           }
@@ -149,5 +147,5 @@ class IsolateEventSink {
       );
 
   /// Send an end of stream event.
-  void endOfStream() => _send.send(IsolateEventChannel._endOfStream);
+  void endOfStream() => _send.send(MethodInvocation.nullResult);
 }
