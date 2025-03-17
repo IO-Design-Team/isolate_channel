@@ -40,7 +40,7 @@ methodChannel.setMethodCallHandler((call) {
       print(call.arguments);
       return 'World!';
     default:
-      return IsolateException.notImplemented(call.method);
+      return call.notImplemented();
   }
 });
 
