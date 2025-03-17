@@ -58,7 +58,6 @@ class MethodInvocation {
   }
 
   /// Respond with an unhandled exception
-  void unhandled(Object error, StackTrace stackTrace) => _respond?.send(
-        IsolateException.unhandled(channel, method, error, stackTrace).toJson(),
-      );
+  void unhandled(Object error, StackTrace stackTrace) =>
+      result(IsolateException.unhandled(channel, method, error, stackTrace));
 }
