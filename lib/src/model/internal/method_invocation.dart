@@ -4,7 +4,7 @@ import 'package:isolate_channel/src/model/isolate_exception.dart';
 
 /// A method invocation message
 class MethodInvocation {
-  /// Null result placeholder since null cannot be send to URI isolates
+  /// Null result placeholder since null cannot be sent to URI isolates
   static const nullResult = '_isolate_channel.null';
 
   /// The name of the channel sending the message
