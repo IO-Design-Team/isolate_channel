@@ -1,11 +1,11 @@
 import 'dart:isolate';
 
 import 'package:isolate_channel/src/model/isolate_exception.dart';
+import 'package:standard_message_codec/standard_message_codec.dart';
 
 /// A method invocation message
 class MethodInvocation {
-  /// Null result placeholder since null cannot be send to URI isolates
-  static const nullResult = '_isolate_channel.null';
+  static final _codec = StandardMessageCodec();
 
   /// The name of the channel sending the message
   final String channel;
@@ -54,7 +54,7 @@ class MethodInvocation {
     if (result is IsolateException) {
       result = result.toJson();
     }
-    _respond?.send(result ?? nullResult);
+    _respond?.send(_codec.encodeMessage(result));
   }
 
   /// Respond with an unhandled exception
