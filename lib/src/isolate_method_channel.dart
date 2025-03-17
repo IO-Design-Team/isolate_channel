@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/model/internal/method_invocation.dart';
+import 'package:isolate_channel/src/utils.dart';
 
 /// A handler for method invocations
 typedef MethodCallHandler = FutureOr<Object?> Function(IsolateMethodCall call);
@@ -31,10 +31,7 @@ class IsolateMethodChannel {
     }
     final receivePort = ReceivePort();
     _connection.invoke(name, method, arguments, receivePort.sendPort);
-    var result = await receivePort.first;
-    if (result == MethodInvocation.nullResult) {
-      result = null;
-    }
+    final result = await receivePort.mapNulls.first;
 
     receivePort.close();
     final error = IsolateException.fromJson(result);

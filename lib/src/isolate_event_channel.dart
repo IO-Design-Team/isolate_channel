@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/method_invocation.dart';
+import 'package:isolate_channel/src/utils.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
@@ -37,11 +38,7 @@ class IsolateEventChannel {
       onListen: () {
         _connection.invoke(name, 'listen', arguments, receivePort.sendPort);
 
-        subscription = receive.listen((event) {
-          if (event == MethodInvocation.nullResult) {
-            event = null;
-          }
-
+        subscription = receive.mapNulls.listen((event) {
           if (event == _endOfStream) {
             close();
             return;
