@@ -13,7 +13,8 @@ Future<IsolateConnection> _spawnIsolate({
   void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
-  required Future<Isolate> Function(ReceivePort, ReceivePort) spawn,
+  required Future<Isolate> Function(ReceivePort receive, ReceivePort control)
+      spawn,
 }) async {
   final receivePort = ReceivePort();
   final controlPort = ReceivePort();
