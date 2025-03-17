@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A handler for method invocations
 typedef MethodCallHandler = FutureOr<dynamic> Function(IsolateMethodCall call);
@@ -30,9 +29,7 @@ class IsolateMethodChannel {
       );
     }
     final receivePort = ReceivePort();
-    _connection.send(
-      MethodInvocation(name, method, arguments, receivePort.sendPort),
-    );
+    _connection.invoke(name, method, arguments, receivePort.sendPort);
     final result = await receivePort.first;
     receivePort.close();
     final error = IsolateException.fromJson(result);
@@ -79,20 +76,17 @@ class IsolateMethodChannel {
     if (handler == null) return;
 
     _handlerSubscription =
-        _connection.methodInvocations(name).listen((message) async {
+        _connection.methodInvocations(name).listen((invocation) async {
       try {
         var result = await handler(
-          IsolateMethodCall(name, message.method, message.arguments),
+          IsolateMethodCall(name, invocation.method, invocation.arguments),
         );
         if (result is IsolateException) {
           result = result.toJson();
         }
-        message.sendPort?.send(result);
+        invocation.result(result);
       } catch (error, stackTrace) {
-        message.sendPort?.send(
-          IsolateException.unhandled(name, message.method, error, stackTrace)
-              .toJson(),
-        );
+        invocation.unhandled(error, stackTrace);
       }
     });
   }

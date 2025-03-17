@@ -1,5 +1,7 @@
 import 'dart:isolate';
 
+import 'package:isolate_channel/src/model/isolate_exception.dart';
+
 /// A method invocation message
 class MethodInvocation {
   /// The name of the channel sending the message
@@ -43,4 +45,11 @@ class MethodInvocation {
       if (sendPort != null) 'sendPort': sendPort,
     };
   }
+
+  /// Respond with a result
+  void result(Object result) => sendPort?.send(result);
+
+  /// Respond with an unhandled exception
+  void unhandled(Object error, StackTrace stackTrace) => sendPort
+      ?.send(IsolateException.unhandled(channel, method, error, stackTrace));
 }

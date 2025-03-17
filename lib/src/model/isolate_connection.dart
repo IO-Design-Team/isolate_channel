@@ -26,36 +26,43 @@ class IsolateConnection {
         _receive = receive.map((message) => MethodInvocation.fromJson(message)),
         _close = close {
     // Handle new connections
-    _subscription = methodInvocations(_channel).listen((message) {
-      switch (message.method) {
+    _subscription = methodInvocations(_channel).listen((invocation) {
+      switch (invocation.method) {
         case 'connect':
-          _sendPorts.add(message.arguments);
+          _sendPorts.add(invocation.arguments);
         case 'disconnect':
-          _sendPorts.remove(message.arguments);
+          _sendPorts.remove(invocation.arguments);
       }
     });
   }
 
-  /// Send a message to all connected isolates
-  void send(MethodInvocation invocation) {
+  /// Send a method invocation to all connected isolates
+  void invoke(
+    String channel,
+    String method,
+    dynamic arguments, [
+    SendPort? sendPort,
+  ]) {
     for (final sendPort in _sendPorts) {
-      sendPort.send(invocation.toJson());
+      sendPort.send(
+        MethodInvocation(channel, method, arguments, sendPort).toJson(),
+      );
     }
   }
 
   /// Stream of method invocations targeting [channel]
   Stream<MethodInvocation> methodInvocations(String channel) {
-    return _receive.where((message) => message.channel == channel);
+    return _receive.where((invocation) => invocation.channel == channel);
   }
 
   /// Send a message to indicate this isolate has connected
   void isolateConnected(SendPort sendPort) {
-    send(MethodInvocation(_channel, 'connect', sendPort, null));
+    invoke(_channel, 'connect', sendPort);
   }
 
   /// Send a message to indicate this isolate has disconnected
   void isolateDisconnected(SendPort sendPort) {
-    send(MethodInvocation(_channel, 'disconnect', sendPort, null));
+    invoke(_channel, 'disconnect', sendPort);
   }
 
   /// Close the connection

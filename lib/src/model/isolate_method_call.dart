@@ -14,7 +14,7 @@ class IsolateMethodCall {
   /// Constructor
   const IsolateMethodCall(this._channel, this.method, this.arguments);
 
-  /// Return a not implemented exception
+  /// Create a not implemented exception for this method call
   IsolateException notImplemented() =>
       IsolateException.notImplemented(_channel, method);
 }

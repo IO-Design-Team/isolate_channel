@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
@@ -35,9 +34,7 @@ class IsolateEventChannel {
 
     controller = StreamController<dynamic>.broadcast(
       onListen: () {
-        _connection.send(
-          MethodInvocation(name, 'listen', arguments, receivePort.sendPort),
-        );
+        _connection.invoke(name, 'listen', arguments, receivePort.sendPort);
 
         subscription = receive.listen((event) {
           if (event == _endOfStream) {
@@ -54,10 +51,8 @@ class IsolateEventChannel {
         });
       },
       onCancel: () {
+        _connection.invoke(name, 'cancel', arguments);
         close();
-        _connection.send(
-          MethodInvocation(name, 'cancel', arguments, receivePort.sendPort),
-        );
       },
     );
     return controller.stream;
@@ -71,23 +66,20 @@ class IsolateEventChannel {
     if (handler == null) return;
 
     _handlerSubscription =
-        _connection.methodInvocations(name).listen((message) {
+        _connection.methodInvocations(name).listen((invocation) {
       try {
-        switch (message.method) {
+        switch (invocation.method) {
           case 'listen':
             handler.onListen(
-              message.arguments,
-              IsolateEventSink(message.sendPort!),
+              invocation.arguments,
+              IsolateEventSink(invocation.sendPort!),
             );
           case 'cancel':
-            handler.onCancel(message.arguments);
+            handler.onCancel(invocation.arguments);
             _handlerSubscription?.cancel();
         }
       } catch (error, stackTrace) {
-        message.sendPort?.send(
-          IsolateException.unhandled(name, message.method, error, stackTrace)
-              .toJson(),
-        );
+        invocation.unhandled(error, stackTrace);
       }
     });
   }
