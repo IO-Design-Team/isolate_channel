@@ -5,7 +5,7 @@ import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/utils.dart';
 
 /// A handler for method invocations
-typedef MethodCallHandler = FutureOr<Object?> Function(IsolateMethodCall call);
+typedef MethodCallHandler = FutureOr<dynamic> Function(IsolateMethodCall call);
 
 /// A method channel for inter-isolate method invocation
 class IsolateMethodChannel {
