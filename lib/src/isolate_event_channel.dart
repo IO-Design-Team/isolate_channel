@@ -6,6 +6,9 @@ import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
+  static const _endOfStream =
+      '_isolate_channel.IsolateEventChannel#endOfStream';
+
   /// The name of the channel
   final String name;
   final IsolateConnection _connection;
@@ -36,6 +39,10 @@ class IsolateEventChannel {
 
         subscription = receive.listen((event) {
           if (event == MethodInvocation.nullResult) {
+            event = null;
+          }
+
+          if (event == _endOfStream) {
             close();
             return;
           }
@@ -137,7 +144,8 @@ class IsolateEventSink {
   const IsolateEventSink(this._send);
 
   /// Send a success event.
-  void success(Object event) => _send.send(event);
+  void success(Object? event) =>
+      _send.send(event ?? MethodInvocation.nullResult);
 
   /// Send an error event.
   void error({required String code, String? message, Object? details}) =>
@@ -147,5 +155,5 @@ class IsolateEventSink {
       );
 
   /// Send an end of stream event.
-  void endOfStream() => _send.send(MethodInvocation.nullResult);
+  void endOfStream() => _send.send(IsolateEventChannel._endOfStream);
 }

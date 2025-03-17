@@ -12,7 +12,7 @@ void eventsEntryPoint(SendPort send) {
     IsolateStreamHandler.inline(
       onListen: (arguments, events) {
         events.success('Hello');
-        events.success(0);
+        events.success(null);
         events.error(
           code: 'code',
           message: 'message',

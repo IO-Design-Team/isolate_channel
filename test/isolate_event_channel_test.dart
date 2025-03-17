@@ -16,7 +16,7 @@ void main() async {
         stream,
         emitsInOrder([
           'Hello',
-          0,
+          null,
           emitsError(
             isAIsolateException(
               code: 'code',
