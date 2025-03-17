@@ -38,7 +38,7 @@ class IsolateException {
   ///
   /// Returns null if the json is invalid
   static IsolateException? fromJson(Object? json) {
-    if (json == null || json is! Map || json['identifier'] != _identifier) {
+    if (json == null || json is! Map || json['type'] != _identifier) {
       return null;
     }
     return IsolateException(
@@ -50,7 +50,7 @@ class IsolateException {
 
   /// To json
   Map<String, dynamic> toJson() => {
-        'identifier': _identifier,
+        'type': _identifier,
         'code': code,
         if (message != null) 'message': message,
         if (details != null) 'details': details,
