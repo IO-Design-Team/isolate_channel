@@ -41,7 +41,8 @@ class IsolateMethodChannel {
       return Future.error(
         IsolateException(
           code: 'unexpected_result',
-          message: 'Expected $T, got $result which is a ${result.runtimeType}',
+          message:
+              'Expected result of type $T, but got $result which is of type ${result.runtimeType}',
         ),
       );
     }

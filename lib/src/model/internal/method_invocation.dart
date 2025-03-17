@@ -50,6 +50,7 @@ class MethodInvocation {
   void result(Object result) => sendPort?.send(result);
 
   /// Respond with an unhandled exception
-  void unhandled(Object error, StackTrace stackTrace) => sendPort
-      ?.send(IsolateException.unhandled(channel, method, error, stackTrace));
+  void unhandled(Object error, StackTrace stackTrace) => sendPort?.send(
+        IsolateException.unhandled(channel, method, error, stackTrace).toJson(),
+      );
 }
