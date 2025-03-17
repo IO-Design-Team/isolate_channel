@@ -1,13 +1,13 @@
 import 'package:isolate_channel/isolate_channel.dart';
-import 'package:standard_message_codec/standard_message_codec.dart';
+import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// Extension on [Stream]
 extension StreamExtension on Stream {
-  static final _codec = StandardMessageCodec();
-
   /// Handle deserialization of invocation results
   Stream<Object?> get mapResults => map((result) {
-        result = _codec.decodeMessage(result);
+        if (result == MethodInvocation.nullResult) {
+          return null;
+        }
 
         final error = IsolateException.fromJson(result);
         if (error != null) {

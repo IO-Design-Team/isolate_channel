@@ -1,7 +1,6 @@
 ## 0.2.0
 
 - BREAKING: Refactors `IsolateException.notImplemented(...)` into `call.notImplemented()`
-- Uses `standard_message_codec` for serialization
 - Supports communication between isolates spawned with `Isolate.spawnUri`
 - EventChannel optimizations
 
