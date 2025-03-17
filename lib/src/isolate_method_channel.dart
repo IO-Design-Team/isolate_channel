@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
+import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A handler for method invocations
 typedef MethodCallHandler = FutureOr<dynamic> Function(IsolateMethodCall call);
