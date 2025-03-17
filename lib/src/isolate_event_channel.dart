@@ -38,15 +38,14 @@ class IsolateEventChannel {
       onListen: () {
         _connection.invoke(name, 'listen', arguments, receivePort.sendPort);
 
-        subscription = receive.mapNulls.listen((event) {
+        subscription = receive.mapResults.listen((event) {
           if (event == _endOfStream) {
             close();
             return;
           }
 
-          final error = IsolateException.fromJson(event);
-          if (error != null) {
-            controller.addError(error);
+          if (event is IsolateException) {
+            controller.addError(event);
           } else {
             controller.add(event);
           }

@@ -31,12 +31,11 @@ class IsolateMethodChannel {
     }
     final receivePort = ReceivePort();
     _connection.invoke(name, method, arguments, receivePort.sendPort);
-    final result = await receivePort.mapNulls.first;
+    final result = await receivePort.mapResults.first;
 
     receivePort.close();
-    final error = IsolateException.fromJson(result);
-    if (error != null) {
-      return Future.error(error);
+    if (result is IsolateException) {
+      return Future.error(result);
     } else if (result is T) {
       return result;
     } else {
