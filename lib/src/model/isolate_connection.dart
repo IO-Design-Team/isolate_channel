@@ -5,7 +5,7 @@ import 'package:isolate_channel/src/model/internal/method_invocation.dart';
 
 /// A connection between isolates
 class IsolateConnection {
-  static const _channel = 'isolate_channel.IsolateConnection';
+  static const _channel = '_isolate_channel.IsolateConnection';
 
   final Set<SendPort> _sendPorts;
 

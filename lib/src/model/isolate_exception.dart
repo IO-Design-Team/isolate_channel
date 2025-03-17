@@ -1,6 +1,6 @@
 /// An exception returned by an isolate
 class IsolateException {
-  static const _identifier = 'isolate_channel.IsolateException';
+  static const _identifier = '_isolate_channel.IsolateException';
 
   /// The code of the exception
   final String code;
