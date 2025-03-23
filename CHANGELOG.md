@@ -1,3 +1,7 @@
+## 0.2.1
+
+- Does not cancel handler subscription when `onCancel` is called in `IsolateEventChannel`
+
 ## 0.2.0
 
 - BREAKING: Refactors `IsolateException.notImplemented(...)` into `call.notImplemented()`

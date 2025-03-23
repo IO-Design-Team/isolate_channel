@@ -75,7 +75,6 @@ class IsolateEventChannel {
             );
           case 'cancel':
             handler.onCancel(invocation.arguments);
-            _handlerSubscription?.cancel();
         }
       } catch (error, stackTrace) {
         invocation.unhandled(error, stackTrace);

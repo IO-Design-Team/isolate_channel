@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:isolate';
+
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
 
@@ -43,5 +46,43 @@ void main() async {
         ),
       );
     });
+  });
+
+  test('multiple listeners', () async {
+    final receivePort = ReceivePort();
+    final connection = IsolateConnection(
+      send: receivePort.sendPort,
+      receive: receivePort.asBroadcastStream(),
+      close: () {},
+    );
+
+    final channel = IsolateEventChannel('test', connection);
+
+    final testController = StreamController();
+    channel.setStreamHandler(
+      IsolateStreamHandler.inline(
+        onListen: (arguments, sink) =>
+            testController.add('onListen: $arguments'),
+        onCancel: (arguments) => testController.add('onCancel: $arguments'),
+      ),
+    );
+
+    expect(
+      testController.stream,
+      emitsInOrder([
+        'onListen: 1',
+        'onCancel: 1',
+        'onListen: 2',
+        'onCancel: 2',
+      ]),
+    );
+
+    final stream1 = channel.receiveBroadcastStream('1');
+    final subscription1 = stream1.listen((event) {});
+    await subscription1.cancel();
+
+    final stream2 = channel.receiveBroadcastStream('2');
+    final subscription2 = stream2.listen((event) {});
+    await subscription2.cancel();
   });
 }
