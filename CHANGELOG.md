@@ -1,3 +1,7 @@
+## 0.2.2
+
+- Handles more edge cases in `IsolateEventChannel`
+
 ## 0.2.1
 
 - Does not cancel handler subscription when `onCancel` is called in `IsolateEventChannel`

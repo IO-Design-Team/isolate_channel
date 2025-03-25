@@ -26,19 +26,15 @@ class IsolateEventChannel {
     late final StreamController controller;
     StreamSubscription? subscription;
 
-    void close() {
-      controller.close();
-      subscription?.cancel();
-      receivePort.close();
-    }
-
     controller = StreamController<dynamic>.broadcast(
       onListen: () {
         _connection.invoke(name, 'listen', arguments, receivePort.sendPort);
 
         subscription = receive.mapResults.listen((event) {
           if (event == _endOfStream) {
-            close();
+            controller.close();
+            subscription?.cancel();
+            receivePort.close();
             return;
           }
 
@@ -51,7 +47,7 @@ class IsolateEventChannel {
       },
       onCancel: () {
         _connection.invoke(name, 'cancel', arguments);
-        close();
+        subscription?.cancel();
       },
     );
     return controller.stream;

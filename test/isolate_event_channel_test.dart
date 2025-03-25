@@ -85,4 +85,40 @@ void main() async {
     final subscription2 = stream2.listen((event) {});
     await subscription2.cancel();
   });
+
+  test('multiple cancellations', () async {
+    final receivePort = ReceivePort();
+    final connection = IsolateConnection(
+      send: receivePort.sendPort,
+      receive: receivePort.asBroadcastStream(),
+      close: () {},
+    );
+
+    final channel = IsolateEventChannel('test', connection);
+
+    final testController = StreamController();
+    channel.setStreamHandler(
+      IsolateStreamHandler.inline(
+        onListen: (arguments, sink) => testController.add('onListen'),
+        onCancel: (arguments) => testController.add('onCancel'),
+      ),
+    );
+
+    expect(
+      testController.stream,
+      emitsInOrder([
+        'onListen',
+        'onCancel',
+        'onListen',
+        'onCancel',
+      ]),
+    );
+
+    final stream = channel.receiveBroadcastStream();
+    final subscription1 = stream.listen((event) {});
+    await subscription1.cancel();
+
+    final subscription2 = stream.listen((event) {});
+    await subscription2.cancel();
+  });
 }
