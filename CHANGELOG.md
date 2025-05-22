@@ -1,3 +1,7 @@
+## 0.2.2+1
+
+- Adds README badges
+
 ## 0.2.2
 
 - Handles more edge cases in `IsolateEventChannel`
