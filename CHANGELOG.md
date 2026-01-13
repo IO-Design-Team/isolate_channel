@@ -1,3 +1,7 @@
+## 0.3.0
+
+- Removes unnecessary type parameters from spawn methods
+
 ## 0.2.2+1
 
 - Adds README badges

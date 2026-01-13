@@ -54,7 +54,7 @@ Future<IsolateConnection> _spawnIsolate({
 ///
 /// [onConnect] can be used to register the [SendPort] with an
 /// [IsolateNameServer]
-Future<IsolateConnection> spawnIsolate<T>(
+Future<IsolateConnection> spawnIsolate(
   IsolateEntryPoint entryPoint, {
   bool paused = false,
   bool errorsAreFatal = true,
@@ -80,7 +80,7 @@ Future<IsolateConnection> spawnIsolate<T>(
 }
 
 /// Helper function to spawn an isolate by URI
-Future<IsolateConnection> spawnUriIsolate<T>(
+Future<IsolateConnection> spawnUriIsolate(
   Uri uri, {
   bool paused = false,
   bool errorsAreFatal = true,
