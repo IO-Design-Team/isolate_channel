@@ -1,8 +1,10 @@
 import 'dart:isolate';
 
 import 'package:isolate_channel/src/model/isolate_exception.dart';
+import 'package:meta/meta.dart';
 
 /// A method invocation message
+@immutable
 class MethodInvocation {
   /// Null result placeholder since null cannot be sent to URI isolates
   static const nullResult = '_isolate_channel.null';

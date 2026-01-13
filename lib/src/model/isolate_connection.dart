@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:isolate_channel/src/model/internal/method_invocation.dart';
+import 'package:meta/meta.dart';
 
 /// A connection between isolates
+@immutable
 class IsolateConnection {
   static const _channel = '_isolate_channel.IsolateConnection';
 

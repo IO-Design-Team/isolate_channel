@@ -1,4 +1,7 @@
+import 'package:meta/meta.dart';
+
 /// An exception returned by an isolate
+@immutable
 class IsolateException {
   static const _identifier = '_isolate_channel.IsolateException';
 

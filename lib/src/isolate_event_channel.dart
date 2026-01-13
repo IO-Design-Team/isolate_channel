@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/method_invocation.dart';
+import 'package:meta/meta.dart';
 
 /// A channel for receiving events from an isolate
 class IsolateEventChannel {
@@ -89,6 +90,7 @@ typedef IsolateStreamHandlerOnListen = void Function(
 typedef IsolateStreamHandlerOnCancel = void Function(dynamic arguments);
 
 /// A handler for setting up stream handling
+@immutable
 abstract class IsolateStreamHandler {
   /// Called when the stream is listened to
   void onListen(dynamic arguments, IsolateEventSink events);
@@ -126,6 +128,7 @@ class _InlineIsolateStreamHandler extends IsolateStreamHandler {
 }
 
 /// A sink for sending events to the stream
+@immutable
 class IsolateEventSink {
   final MethodInvocation _invocation;
 

@@ -1,6 +1,8 @@
 import 'package:isolate_channel/src/model/isolate_exception.dart';
+import 'package:meta/meta.dart';
 
 /// A method call from one isolate to another
+@immutable
 class IsolateMethodCall {
   /// The name of the channel
   final String _channel;

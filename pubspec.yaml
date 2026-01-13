@@ -11,3 +11,5 @@ dev_dependencies:
   rexios_lints: ^17.0.2
   mockito: ^5.4.5
   build_runner: ^2.4.15
+dependencies:
+  meta: ^1.17.0
