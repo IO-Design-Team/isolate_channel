@@ -14,8 +14,11 @@ typedef UriIsolateEntryPoint = void Function(List<String> args, SendPort send);
 /// The return type is `dynamic` to support custom isolate implementations such
 /// as `FlutterIsolate`. The returned object MUST implement a `kill()` method.
 typedef IsolateSpawner = Future<dynamic> Function(
-  ReceivePort receive,
-  ReceivePort control,
+  /// The child isolate sends messages to the parent isolate on this port
+  SendPort send,
+
+  /// The child isolate sends control messages to the parent isolate on this port
+  SendPort control,
 );
 
 Future<IsolateConnection> _spawnIsolate({
@@ -27,7 +30,7 @@ Future<IsolateConnection> _spawnIsolate({
   final receivePort = ReceivePort();
   final controlPort = ReceivePort();
 
-  final isolate = await spawn(receivePort, controlPort);
+  final isolate = await spawn(receivePort.sendPort, controlPort.sendPort);
 
   final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
@@ -77,13 +80,13 @@ Future<IsolateConnection> spawnIsolate(
     onExit: onExit,
     onError: onError,
     spawn: spawn ??
-        (receivePort, controlPort) => Isolate.spawn(
+        (send, control) => Isolate.spawn(
               entryPoint,
-              receivePort.sendPort,
+              send,
               paused: paused,
               errorsAreFatal: errorsAreFatal,
-              onExit: controlPort.sendPort,
-              onError: controlPort.sendPort,
+              onExit: control,
+              onError: control,
               debugName: debugName,
             ),
   );
@@ -105,14 +108,14 @@ Future<IsolateConnection> spawnUriIsolate(
     onExit: onExit,
     onError: onError,
     spawn: spawn ??
-        (receivePort, controlPort) => Isolate.spawnUri(
+        (send, control) => Isolate.spawnUri(
               uri,
               [],
-              receivePort.sendPort,
+              send,
               paused: paused,
               errorsAreFatal: errorsAreFatal,
-              onExit: controlPort.sendPort,
-              onError: controlPort.sendPort,
+              onExit: control,
+              onError: control,
               debugName: debugName,
             ),
   );
