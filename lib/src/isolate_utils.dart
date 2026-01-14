@@ -9,12 +9,20 @@ typedef IsolateEntryPoint = void Function(SendPort send);
 /// The entry point of an isolate spawned with [Isolate.spawnUri]
 typedef UriIsolateEntryPoint = void Function(List<String> args, SendPort send);
 
+/// A function that spawns an isolate
+///
+/// The return type is `dynamic` to support custom isolate implementations such
+/// as `FlutterIsolate`. The returned object MUST implement a `kill()` method.
+typedef IsolateSpawner = Future<dynamic> Function(
+  ReceivePort receive,
+  ReceivePort control,
+);
+
 Future<IsolateConnection> _spawnIsolate({
   void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
-  required Future<Isolate> Function(ReceivePort receive, ReceivePort control)
-      spawn,
+  required IsolateSpawner spawn,
 }) async {
   final receivePort = ReceivePort();
   final controlPort = ReceivePort();
@@ -62,20 +70,22 @@ Future<IsolateConnection> spawnIsolate(
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
+  IsolateSpawner? spawn,
 }) {
   return _spawnIsolate(
     onConnect: onConnect,
     onExit: onExit,
     onError: onError,
-    spawn: (receivePort, controlPort) => Isolate.spawn(
-      entryPoint,
-      receivePort.sendPort,
-      paused: paused,
-      errorsAreFatal: errorsAreFatal,
-      onExit: controlPort.sendPort,
-      onError: controlPort.sendPort,
-      debugName: debugName,
-    ),
+    spawn: spawn ??
+        (receivePort, controlPort) => Isolate.spawn(
+              entryPoint,
+              receivePort.sendPort,
+              paused: paused,
+              errorsAreFatal: errorsAreFatal,
+              onExit: controlPort.sendPort,
+              onError: controlPort.sendPort,
+              debugName: debugName,
+            ),
   );
 }
 
@@ -88,21 +98,23 @@ Future<IsolateConnection> spawnUriIsolate(
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
+  IsolateSpawner? spawn,
 }) {
   return _spawnIsolate(
     onConnect: onConnect,
     onExit: onExit,
     onError: onError,
-    spawn: (receivePort, controlPort) => Isolate.spawnUri(
-      uri,
-      [],
-      receivePort.sendPort,
-      paused: paused,
-      errorsAreFatal: errorsAreFatal,
-      onExit: controlPort.sendPort,
-      onError: controlPort.sendPort,
-      debugName: debugName,
-    ),
+    spawn: spawn ??
+        (receivePort, controlPort) => Isolate.spawnUri(
+              uri,
+              [],
+              receivePort.sendPort,
+              paused: paused,
+              errorsAreFatal: errorsAreFatal,
+              onExit: controlPort.sendPort,
+              onError: controlPort.sendPort,
+              debugName: debugName,
+            ),
   );
 }
 
