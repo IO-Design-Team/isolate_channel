@@ -38,7 +38,7 @@ void main() {
         onConnect: (port) => send = port,
       );
 
-      final connection2 = connectToIsolate(send);
+      final connection2 = await connectToIsolate(send);
       connection2.invoke(channel, 'Hello', null);
 
       final stream = connection1.methodInvocations(channel);
