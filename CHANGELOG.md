@@ -1,3 +1,7 @@
+## 0.4.1
+
+- Loosens constraint on `meta`
+
 ## 0.4.0
 
 - Allows passing an `IsolateSpawner` to support custom isolate implementations such as `FlutterIsolate`
