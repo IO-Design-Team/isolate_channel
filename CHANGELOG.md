@@ -1,3 +1,8 @@
+## 0.4.0
+
+- Allows passing an `IsolateSpawner` to support custom isolate implementations such as `FlutterIsolate`
+- Makes `connectToIsolate` return a `Future` so that connection failure can be handled
+
 ## 0.3.0
 
 - Removes unnecessary type parameters from spawn methods
