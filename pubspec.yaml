@@ -6,10 +6,11 @@ version: 0.4.0
 environment:
   sdk: ^3.0.0
 
+dependencies:
+  meta: ^1.17.0
+
 dev_dependencies:
   test: ^1.24.0
   rexios_lints: ^17.0.2
   mockito: ^5.4.5
   build_runner: ^2.4.15
-dependencies:
-  meta: ^1.17.0
