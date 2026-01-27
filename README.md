@@ -82,5 +82,5 @@ connection.close();
 Pass an isolate's send port to the `connectToIsolate` function to connect to it. A send port can be retrieved from an [IsolateNameServer](https://api.flutter.dev/flutter/dart-ui/IsolateNameServer-class.html).
 
 ```dart
-final connection = connectToIsolate(send);
+final connection = await connectToIsolate(send);
 ```

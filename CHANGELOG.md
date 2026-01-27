@@ -1,3 +1,7 @@
+## 0.4.2
+
+- Updates README to reflect that `connectToIsolate` returns a `Future`
+
 ## 0.4.1
 
 - Loosens constraint on `meta`
