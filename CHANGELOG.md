@@ -1,3 +1,8 @@
+## 0.5.0
+
+- Exposes the `spawnIsolateConnection` function that allows connecting to custom isolates
+- Removes the `spawn` parameters from the `spawnIsolate` and `spawnUriIsolate` functions
+
 ## 0.4.2
 
 - Updates README to reflect that `connectToIsolate` returns a `Future`

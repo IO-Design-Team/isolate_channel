@@ -66,6 +66,8 @@ class IsolateConnection {
   }
 
   /// Close the connection
+  ///
+  /// If this connection spawned the isolate, the isolate will be killed
   void close() {
     _connectionChannel.setMethodCallHandler(null);
     _close();

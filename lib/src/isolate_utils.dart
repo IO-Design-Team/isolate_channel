@@ -21,7 +21,10 @@ typedef IsolateSpawner = Future<dynamic> Function(
   SendPort control,
 );
 
-Future<IsolateConnection> _spawnIsolate({
+/// Raw isolate connection spawner
+/// 
+/// Useful for custom isolate implementations such as `FlutterIsolate`.
+Future<IsolateConnection> spawnIsolateConnection({
   void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
@@ -73,22 +76,20 @@ Future<IsolateConnection> spawnIsolate(
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
-  IsolateSpawner? spawn,
 }) {
-  return _spawnIsolate(
+  return spawnIsolateConnection(
     onConnect: onConnect,
     onExit: onExit,
     onError: onError,
-    spawn: spawn ??
-        (send, control) => Isolate.spawn(
-              entryPoint,
-              send,
-              paused: paused,
-              errorsAreFatal: errorsAreFatal,
-              onExit: control,
-              onError: control,
-              debugName: debugName,
-            ),
+    spawn: (send, control) => Isolate.spawn(
+      entryPoint,
+      send,
+      paused: paused,
+      errorsAreFatal: errorsAreFatal,
+      onExit: control,
+      onError: control,
+      debugName: debugName,
+    ),
   );
 }
 
@@ -101,23 +102,21 @@ Future<IsolateConnection> spawnUriIsolate(
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
-  IsolateSpawner? spawn,
 }) {
-  return _spawnIsolate(
+  return spawnIsolateConnection(
     onConnect: onConnect,
     onExit: onExit,
     onError: onError,
-    spawn: spawn ??
-        (send, control) => Isolate.spawnUri(
-              uri,
-              [],
-              send,
-              paused: paused,
-              errorsAreFatal: errorsAreFatal,
-              onExit: control,
-              onError: control,
-              debugName: debugName,
-            ),
+    spawn: (send, control) => Isolate.spawnUri(
+      uri,
+      [],
+      send,
+      paused: paused,
+      errorsAreFatal: errorsAreFatal,
+      onExit: control,
+      onError: control,
+      debugName: debugName,
+    ),
   );
 }
 
