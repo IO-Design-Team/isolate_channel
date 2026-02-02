@@ -16,6 +16,9 @@ typedef UriIsolateEntryPoint = void Function(List<String> args, SendPort send);
 typedef IsolateSpawner = Future<dynamic> Function(
   /// The child isolate sends messages to the parent isolate on this port
   SendPort send,
+
+  /// The child isolate sends control messages to the parent isolate on this port
+  SendPort control,
 );
 
 /// Raw isolate connection spawner
@@ -29,7 +32,7 @@ Future<IsolateConnection> spawnIsolateConnection({
   final receivePort = ReceivePort();
   final controlPort = ReceivePort();
 
-  final isolate = await spawn(receivePort.sendPort);
+  final isolate = await spawn(receivePort.sendPort, controlPort.sendPort);
 
   final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
@@ -74,11 +77,13 @@ Future<IsolateConnection> spawnIsolate(
   return spawnIsolateConnection(
     onExit: onExit,
     onError: onError,
-    spawn: (send) => Isolate.spawn(
+    spawn: (send, control) => Isolate.spawn(
       entryPoint,
       send,
       paused: paused,
       errorsAreFatal: errorsAreFatal,
+      onExit: control,
+      onError: control,
       debugName: debugName,
     ),
   );
@@ -96,12 +101,14 @@ Future<IsolateConnection> spawnUriIsolate(
   return spawnIsolateConnection(
     onExit: onExit,
     onError: onError,
-    spawn: (send) => Isolate.spawnUri(
+    spawn: (send, control) => Isolate.spawnUri(
       uri,
       [],
       send,
       paused: paused,
       errorsAreFatal: errorsAreFatal,
+      onExit: control,
+      onError: control,
       debugName: debugName,
     ),
   );
