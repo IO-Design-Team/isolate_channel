@@ -17,6 +17,8 @@ const sendPortName = 'send_port';
 
 void main() {
   group('utils', () {
+    tearDown(() => IsolateNameServer.removePortNameMapping(sendPortName));
+
     test('spawn and setup isolate', () async {
       final connection = await spawnIsolate(isolateEntryPoint);
       final stream = connection.methodInvocations(channel);
