@@ -32,7 +32,6 @@ class IsolateConnection {
       switch (invocation.method) {
         case 'connect':
           _sendPorts.add(invocation.arguments);
-          invocation.result(null);
         case 'disconnect':
           _sendPorts.remove(invocation.arguments);
         case 'addOnExitListener':
@@ -40,6 +39,7 @@ class IsolateConnection {
         case 'addErrorListener':
           Isolate.current.addErrorListener(invocation.arguments);
       }
+      invocation.result(null);
     });
   }
 
