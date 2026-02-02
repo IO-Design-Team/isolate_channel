@@ -113,7 +113,8 @@ Future<IsolateConnection> spawnUriIsolate(
 
 /// Helper function to set up an isolate for channel communication
 ///
-/// [send] is the [SendPort] used to send messages to the parent isolate
+/// [send] is the [SendPort] used to send messages to the parent isolate. This
+/// is nullable to support cases where the child isolate is restarted.
 ///
 /// [onSendPortReady] can be used to register the [SendPort] with an
 /// [IsolateNameServer]. This [SendPort] is the port used to send messages to

@@ -1,3 +1,8 @@
+## 0.6.0
+
+- Removes `onConnect` callbacks in favor of `onSendPortReady` in `setupIsolate` to support headless restarts
+- The `setupIsolate` function now accepts a nullable `send` parameter to support headless restarts
+
 ## 0.5.0
 
 - Exposes the `spawnIsolateConnection` function that allows connecting to custom isolates
