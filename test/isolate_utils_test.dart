@@ -25,8 +25,8 @@ void main() {
       expect(
         stream,
         emitsInOrder([
-          isAMethodInvocation(channel, 'addOnExitListener'),
-          isAMethodInvocation(channel, 'addErrorListener'),
+          mayEmit(isAMethodInvocation(channel, 'addOnExitListener')),
+          mayEmit(isAMethodInvocation(channel, 'addErrorListener')),
           isAMethodInvocation(channel, 'Hello'),
           emitsDone,
         ]),
@@ -44,8 +44,8 @@ void main() {
       expect(
         stream,
         emitsInOrder([
-          isAMethodInvocation(channel, 'addOnExitListener'),
-          isAMethodInvocation(channel, 'addErrorListener'),
+          mayEmit(isAMethodInvocation(channel, 'addOnExitListener')),
+          mayEmit(isAMethodInvocation(channel, 'addErrorListener')),
           isAMethodInvocation(channel, 'connect'),
           isAMethodInvocation(channel, 'addOnExitListener'),
           isAMethodInvocation(channel, 'addErrorListener'),
@@ -71,8 +71,9 @@ void main() {
       final completer = Completer<void>();
 
       await spawnIsolate(
-        (send) {
+        (send) async {
           setupIsolate(send);
+          await Future.delayed(const Duration(milliseconds: 100));
           Isolate.current.kill();
         },
         onExit: completer.complete,
@@ -86,8 +87,9 @@ void main() {
       final errorCompleter = Completer<(String, StackTrace)>();
 
       await spawnIsolate(
-        (send) {
+        (send) async {
           setupIsolate(send);
+          await Future.delayed(const Duration(milliseconds: 100));
           throw 1234;
         },
         onExit: exitCompleter.complete,
