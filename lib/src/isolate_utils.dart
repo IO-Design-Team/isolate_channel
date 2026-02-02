@@ -22,10 +22,9 @@ typedef IsolateSpawner = Future<dynamic> Function(
 );
 
 /// Raw isolate connection spawner
-/// 
+///
 /// Useful for custom isolate implementations such as `FlutterIsolate`.
 Future<IsolateConnection> spawnIsolateConnection({
-  void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   required IsolateSpawner spawn,
@@ -37,7 +36,6 @@ Future<IsolateConnection> spawnIsolateConnection({
 
   final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
-  onConnect?.call(send);
   void close() {
     receivePort.close();
     isolate.kill();
@@ -65,20 +63,15 @@ Future<IsolateConnection> spawnIsolateConnection({
 }
 
 /// Helper function to spawn an isolate that supports channel communication
-///
-/// [onConnect] can be used to register the [SendPort] with an
-/// [IsolateNameServer]
 Future<IsolateConnection> spawnIsolate(
   IsolateEntryPoint entryPoint, {
   bool paused = false,
   bool errorsAreFatal = true,
-  void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
 }) {
   return spawnIsolateConnection(
-    onConnect: onConnect,
     onExit: onExit,
     onError: onError,
     spawn: (send, control) => Isolate.spawn(
@@ -98,13 +91,11 @@ Future<IsolateConnection> spawnUriIsolate(
   Uri uri, {
   bool paused = false,
   bool errorsAreFatal = true,
-  void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
 }) {
   return spawnIsolateConnection(
-    onConnect: onConnect,
     onExit: onExit,
     onError: onError,
     spawn: (send, control) => Isolate.spawnUri(
@@ -121,9 +112,20 @@ Future<IsolateConnection> spawnUriIsolate(
 }
 
 /// Helper function to set up an isolate for channel communication
-IsolateConnection setupIsolate(SendPort send) {
+///
+/// [send] is the [SendPort] used to send messages to the parent isolate
+///
+/// [onSendPortReady] can be used to register the [SendPort] with an
+/// [IsolateNameServer]. This [SendPort] is the port used to send messages to
+/// this isolate.
+IsolateConnection setupIsolate(
+  SendPort? send, {
+  void Function(SendPort send)? onSendPortReady,
+}) {
   final receivePort = ReceivePort();
-  send.send(receivePort.sendPort);
+  final sendPort = receivePort.sendPort;
+  send?.send(sendPort);
+  onSendPortReady?.call(sendPort);
 
   return IsolateConnection(
     send: send,

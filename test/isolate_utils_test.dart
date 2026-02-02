@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:isolate_channel/src/model/internal/method_invocation.dart';
+import 'package:isolate_name_server/isolate_name_server.dart';
 import 'package:test/test.dart';
 
 Matcher isAMethodInvocation(String channel, String method) {
@@ -12,6 +13,7 @@ Matcher isAMethodInvocation(String channel, String method) {
 }
 
 const channel = '_isolate_channel.IsolateConnection';
+const sendPortName = 'send_port';
 
 void main() {
   group('utils', () {
@@ -32,12 +34,10 @@ void main() {
     });
 
     test('connect to isolate', () async {
-      late final SendPort send;
-      final connection1 = await spawnIsolate(
-        isolateEntryPoint,
-        onConnect: (port) => send = port,
-      );
+      final connection1 = await spawnIsolate(isolateEntryPoint);
 
+      final send = IsolateNameServer.lookupPortByName(sendPortName);
+      if (send == null) throw StateError('Send port not found');
       final connection2 = await connectToIsolate(send);
       connection2.invoke(channel, 'Hello', null);
 
@@ -97,7 +97,11 @@ void main() {
 }
 
 void isolateEntryPoint(SendPort send) {
-  final connection = setupIsolate(send);
+  final connection = setupIsolate(
+    send,
+    onSendPortReady: (send) =>
+        IsolateNameServer.registerPortWithName(send, sendPortName),
+  );
   connection.methodInvocations(channel).listen(
         (invocation) => connection.invoke(
           invocation.channel,

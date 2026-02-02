@@ -21,10 +21,10 @@ class IsolateConnection {
 
   /// Constructor
   IsolateConnection({
-    required SendPort send,
+    SendPort? send,
     required Stream receive,
     required void Function() close,
-  })  : _sendPorts = {send},
+  })  : _sendPorts = {if (send != null) send},
         _receive = receive.map((message) => MethodInvocation.fromJson(message)),
         _close = close {
     // Handle new connections

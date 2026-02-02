@@ -14,3 +14,4 @@ dev_dependencies:
   rexios_lints: ^17.0.2
   mockito: ^5.4.5
   build_runner: ^2.4.15
+  isolate_name_server: ^1.1.0
