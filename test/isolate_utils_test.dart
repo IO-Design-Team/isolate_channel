@@ -35,12 +35,6 @@ void main() {
 
     test('connect to isolate', () async {
       final connection1 = await spawnIsolate(isolateEntryPoint);
-
-      final send = IsolateNameServer.lookupPortByName(sendPortName);
-      if (send == null) throw StateError('Send port not found');
-      final connection2 = await connectToIsolate(send);
-      connection2.invoke(channel, 'Hello', null);
-
       final stream = connection1.methodInvocations(channel);
       expect(
         stream,
@@ -51,6 +45,11 @@ void main() {
           emitsDone,
         ]),
       );
+
+      final send = IsolateNameServer.lookupPortByName(sendPortName);
+      if (send == null) throw StateError('Send port not found');
+      final connection2 = await connectToIsolate(send);
+      connection2.invoke(channel, 'Hello', null);
 
       // Wait for the messages to be received
       await stream.take(2).drain();
