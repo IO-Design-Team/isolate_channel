@@ -4,7 +4,7 @@ import 'package:isolate_channel/isolate_channel.dart';
 
 void main(List<String> args, SendPort send) => eventsEntryPoint(send);
 
-void eventsEntryPoint(SendPort send) {
+void eventsEntryPoint(SendPort? send) {
   final connection = setupIsolate(send);
 
   final channel = IsolateEventChannel('test', connection);

@@ -25,23 +25,30 @@ void main() {
       expect(
         stream,
         emitsInOrder([
+          isAMethodInvocation(channel, 'addOnExitListener'),
+          isAMethodInvocation(channel, 'addErrorListener'),
           isAMethodInvocation(channel, 'Hello'),
           emitsDone,
         ]),
       );
       connection.invoke(channel, 'Hello', null);
-      // Wait for the message to be received
-      await stream.first;
+      // Wait for the messages to be received
+      await Future.delayed(const Duration(milliseconds: 100));
       connection.close();
     });
 
     test('connect to isolate', () async {
       final connection1 = await spawnIsolate(isolateEntryPoint);
       final stream = connection1.methodInvocations(channel);
+      stream.listen((e) => print(e.method));
       expect(
         stream,
         emitsInOrder([
+          isAMethodInvocation(channel, 'addOnExitListener'),
+          isAMethodInvocation(channel, 'addErrorListener'),
           isAMethodInvocation(channel, 'connect'),
+          isAMethodInvocation(channel, 'addOnExitListener'),
+          isAMethodInvocation(channel, 'addErrorListener'),
           isAMethodInvocation(channel, 'Hello'),
           isAMethodInvocation(channel, 'disconnect'),
           emitsDone,
@@ -54,7 +61,7 @@ void main() {
       connection2.invoke(channel, 'Hello', null);
 
       // Wait for the messages to be received
-      await stream.take(2).drain();
+      await Future.delayed(const Duration(milliseconds: 100));
       connection2.close();
       await stream.first;
       connection1.close();
@@ -97,7 +104,7 @@ void main() {
   });
 }
 
-void isolateEntryPoint(SendPort send) {
+void isolateEntryPoint(SendPort? send) {
   final connection = setupIsolate(
     send,
     onSendPortReady: (send) =>

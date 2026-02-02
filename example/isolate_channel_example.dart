@@ -23,7 +23,7 @@ void main() async {
   connection.close();
 }
 
-void isolateEntryPoint(SendPort send) {
+void isolateEntryPoint(SendPort? send) {
   final connection = setupIsolate(send);
 
   final methodChannel = IsolateMethodChannel('method_channel', connection);

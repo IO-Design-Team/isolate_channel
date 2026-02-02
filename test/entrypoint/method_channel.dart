@@ -5,7 +5,7 @@ import 'package:isolate_channel/isolate_channel.dart';
 @pragma('vm:entry-point')
 void main(List<String> args, SendPort send) => isolateEntryPoint(send);
 
-void isolateEntryPoint(SendPort send) {
+void isolateEntryPoint(SendPort? send) {
   final connection = setupIsolate(send);
 
   final channel = IsolateMethodChannel('test', connection);

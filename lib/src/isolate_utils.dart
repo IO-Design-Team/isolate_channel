@@ -4,7 +4,7 @@ import 'dart:isolate';
 import 'package:isolate_channel/isolate_channel.dart';
 
 /// The entry point of an isolate spawned with [Isolate.spawn]
-typedef IsolateEntryPoint = void Function(SendPort send);
+typedef IsolateEntryPoint = void Function(SendPort? send);
 
 /// The entry point of an isolate spawned with [Isolate.spawnUri]
 typedef UriIsolateEntryPoint = void Function(List<String> args, SendPort send);
@@ -58,6 +58,9 @@ Future<IsolateConnection> spawnIsolateConnection({
       onError?.call(message[0], StackTrace.fromString(message[1]));
     }
   });
+
+  await connection.addOnExitListener(controlPort.sendPort);
+  await connection.addErrorListener(controlPort.sendPort);
 
   return connection;
 }
@@ -136,8 +139,14 @@ IsolateConnection setupIsolate(
 }
 
 /// Helper function to connect to an existing isolate
-Future<IsolateConnection> connectToIsolate(SendPort send) async {
+Future<IsolateConnection> connectToIsolate(
+  SendPort send, {
+  void Function()? onExit,
+  void Function(String error, StackTrace stackTrace)? onError,
+}) async {
   final receivePort = ReceivePort();
+  final controlPort = ReceivePort();
+
   final receive = receivePort.asBroadcastStream();
   late final IsolateConnection connection;
   void close() {
@@ -146,7 +155,25 @@ Future<IsolateConnection> connectToIsolate(SendPort send) async {
   }
 
   connection = IsolateConnection(send: send, receive: receive, close: close);
+
+  late final StreamSubscription controlSubscription;
+  controlSubscription = controlPort.listen((message) {
+    if (message == null) {
+      // This is an exit message
+      receivePort.close();
+      controlPort.close();
+      connection.close();
+      controlSubscription.cancel();
+      onExit?.call();
+    } else {
+      // This is an error message
+      onError?.call(message[0], StackTrace.fromString(message[1]));
+    }
+  });
+
   await connection.isolateConnected(receivePort.sendPort);
+  await connection.addOnExitListener(controlPort.sendPort);
+  await connection.addErrorListener(controlPort.sendPort);
 
   return connection;
 }

@@ -32,10 +32,14 @@ class IsolateConnection {
       switch (invocation.method) {
         case 'connect':
           _sendPorts.add(invocation.arguments);
-          invocation.result(null);
         case 'disconnect':
           _sendPorts.remove(invocation.arguments);
+        case 'addOnExitListener':
+          Isolate.current.addOnExitListener(invocation.arguments);
+        case 'addErrorListener':
+          Isolate.current.addErrorListener(invocation.arguments);
       }
+      invocation.result(null);
     });
   }
 
@@ -56,14 +60,22 @@ class IsolateConnection {
     return _receive.where((invocation) => invocation.channel == channel);
   }
 
+  Future<void> _invokeWithResponse(
+    String channel,
+    String method,
+    dynamic arguments,
+  ) {
+    final receivePort = ReceivePort();
+    invoke(channel, method, arguments, receivePort.sendPort);
+    return receivePort.first;
+  }
+
   /// Send a message to indicate this isolate has connected
   ///
   /// Returns a future that completes when the isolate we are connecting to
   /// responds to indicate a successful connection
   Future<void> isolateConnected(SendPort sendPort) {
-    final receivePort = ReceivePort();
-    invoke(_channel, 'connect', sendPort, receivePort.sendPort);
-    return receivePort.first;
+    return _invokeWithResponse(_channel, 'connect', sendPort);
   }
 
   /// Send a message to indicate this isolate has disconnected
@@ -71,6 +83,16 @@ class IsolateConnection {
   /// Does not return a future because there could be many isolates connected
   void isolateDisconnected(SendPort sendPort) {
     invoke(_channel, 'disconnect', sendPort);
+  }
+
+  /// Add an on exit listener
+  Future<void> addOnExitListener(SendPort sendPort) {
+    return _invokeWithResponse(_channel, 'addOnExitListener', sendPort);
+  }
+
+  /// Add an on error listener
+  Future<void> addErrorListener(SendPort sendPort) {
+    return _invokeWithResponse(_channel, 'addErrorListener', sendPort);
   }
 
   /// Close the connection

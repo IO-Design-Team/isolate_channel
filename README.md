@@ -23,7 +23,7 @@ final connection = await spawnIsolate(isolateEntryPoint);
 In the newly spawned isolate, use the `setupIsolate` function to set up the isolate for channel communication
 
 ```dart
-void isolateEntryPoint(SendPort send) {
+void isolateEntryPoint(SendPort? send) {
   final connection = setupIsolate(send);
 }
 ```

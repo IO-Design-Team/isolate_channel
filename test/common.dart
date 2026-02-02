@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:mockito/annotations.dart';
@@ -43,7 +42,7 @@ MockIsolateConnection createConnection({
 }
 
 Future<IsolateConnection> spawn({
-  void Function(SendPort)? entryPoint,
+  IsolateEntryPoint? entryPoint,
   String? entryPointFile,
 }) {
   assert(entryPoint != null || entryPointFile != null);
