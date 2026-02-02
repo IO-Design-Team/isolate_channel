@@ -160,12 +160,6 @@ Future<IsolateConnection> connectToIsolate(
 
   final receive = receivePort.asBroadcastStream();
   late final IsolateConnection connection;
-  void close() {
-    connection.isolateDisconnected(receivePort.sendPort);
-    receivePort.close();
-  }
-
-  connection = IsolateConnection(send: send, receive: receive, close: close);
 
   late final StreamSubscription controlSubscription;
   controlSubscription = controlPort.listen((message) {
@@ -181,6 +175,15 @@ Future<IsolateConnection> connectToIsolate(
       onError?.call(message[0], StackTrace.fromString(message[1]));
     }
   });
+
+  void close() {
+    connection.isolateDisconnected(receivePort.sendPort);
+    receivePort.close();
+    controlPort.close();
+    controlSubscription.cancel();
+  }
+
+  connection = IsolateConnection(send: send, receive: receive, close: close);
 
   await connection.isolateConnected(receivePort.sendPort);
   connection.addOnExitListener(controlPort.sendPort);
