@@ -59,8 +59,8 @@ Future<IsolateConnection> spawnIsolateConnection({
     }
   });
 
-  await connection.addOnExitListener(controlPort.sendPort);
-  await connection.addErrorListener(controlPort.sendPort);
+  connection.addOnExitListener(controlPort.sendPort);
+  connection.addErrorListener(controlPort.sendPort);
 
   return connection;
 }
@@ -172,8 +172,8 @@ Future<IsolateConnection> connectToIsolate(
   });
 
   await connection.isolateConnected(receivePort.sendPort);
-  await connection.addOnExitListener(controlPort.sendPort);
-  await connection.addErrorListener(controlPort.sendPort);
+  connection.addOnExitListener(controlPort.sendPort);
+  connection.addErrorListener(controlPort.sendPort);
 
   return connection;
 }

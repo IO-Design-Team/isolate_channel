@@ -32,6 +32,7 @@ class IsolateConnection {
       switch (invocation.method) {
         case 'connect':
           _sendPorts.add(invocation.arguments);
+          invocation.result(null);
         case 'disconnect':
           _sendPorts.remove(invocation.arguments);
         case 'addOnExitListener':
@@ -39,7 +40,6 @@ class IsolateConnection {
         case 'addErrorListener':
           Isolate.current.addErrorListener(invocation.arguments);
       }
-      invocation.result(null);
     });
   }
 
@@ -86,13 +86,13 @@ class IsolateConnection {
   }
 
   /// Add an on exit listener
-  Future<void> addOnExitListener(SendPort sendPort) {
-    return _invokeWithResponse(_channel, 'addOnExitListener', sendPort);
+  void addOnExitListener(SendPort sendPort) {
+    invoke(_channel, 'addOnExitListener', sendPort);
   }
 
   /// Add an on error listener
-  Future<void> addErrorListener(SendPort sendPort) {
-    return _invokeWithResponse(_channel, 'addErrorListener', sendPort);
+  void addErrorListener(SendPort sendPort) {
+    invoke(_channel, 'addErrorListener', sendPort);
   }
 
   /// Close the connection

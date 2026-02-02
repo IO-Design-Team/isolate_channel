@@ -71,9 +71,8 @@ void main() {
       final completer = Completer<void>();
 
       await spawnIsolate(
-        (send) async {
+        (send) {
           setupIsolate(send);
-          await Future.delayed(const Duration(milliseconds: 100));
           Isolate.current.kill();
         },
         onExit: completer.complete,
@@ -87,9 +86,8 @@ void main() {
       final errorCompleter = Completer<(String, StackTrace)>();
 
       await spawnIsolate(
-        (send) async {
+        (send) {
           setupIsolate(send);
-          await Future.delayed(const Duration(milliseconds: 100));
           throw 1234;
         },
         onExit: exitCompleter.complete,
