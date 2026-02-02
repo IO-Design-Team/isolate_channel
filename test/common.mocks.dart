@@ -80,15 +80,13 @@ class MockIsolateConnection extends _i1.Mock implements _i2.IsolateConnection {
       ) as _i4.Future<void>);
 
   @override
-  _i4.Future<void> isolateDisconnected(_i3.SendPort? sendPort) =>
-      (super.noSuchMethod(
+  void isolateDisconnected(_i3.SendPort? sendPort) => super.noSuchMethod(
         Invocation.method(
           #isolateDisconnected,
           [sendPort],
         ),
-        returnValue: _i4.Future<void>.value(),
-        returnValueForMissingStub: _i4.Future<void>.value(),
-      ) as _i4.Future<void>);
+        returnValueForMissingStub: null,
+      );
 
   @override
   void close() => super.noSuchMethod(
