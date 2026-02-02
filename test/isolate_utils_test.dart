@@ -38,9 +38,6 @@ void main() {
         onConnect: (port) => send = port,
       );
 
-      final connection2 = await connectToIsolate(send);
-      connection2.invoke(channel, 'Hello', null);
-
       final stream = connection1.methodInvocations(channel);
       expect(
         stream,
@@ -51,6 +48,9 @@ void main() {
           emitsDone,
         ]),
       );
+
+      final connection2 = await connectToIsolate(send);
+      connection2.invoke(channel, 'Hello', null);
 
       // Wait for the messages to be received
       await stream.take(2).drain();
