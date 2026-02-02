@@ -40,7 +40,6 @@ void main() {
     test('connect to isolate', () async {
       final connection1 = await spawnIsolate(isolateEntryPoint);
       final stream = connection1.methodInvocations(channel);
-      stream.listen((e) => print(e.method));
       expect(
         stream,
         emitsInOrder([
