@@ -24,7 +24,13 @@ typedef IsolateSpawner = Future<dynamic> Function(
 /// Raw isolate connection spawner
 ///
 /// Useful for custom isolate implementations such as `FlutterIsolate`.
+///
+/// [onConnect] can be used to register the [SendPort] with an
+/// [IsolateNameServer]. Prefer using `onSendPortReady` in `setupIsolate`
+/// instead to support headless restarts such as in an Android foreground
+/// service.
 Future<IsolateConnection> spawnIsolateConnection({
+  void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   required IsolateSpawner spawn,
@@ -36,6 +42,7 @@ Future<IsolateConnection> spawnIsolateConnection({
 
   final receive = receivePort.asBroadcastStream();
   final send = await receive.first as SendPort;
+  onConnect?.call(send);
   void close() {
     receivePort.close();
     isolate.kill();
@@ -70,11 +77,13 @@ Future<IsolateConnection> spawnIsolate(
   IsolateEntryPoint entryPoint, {
   bool paused = false,
   bool errorsAreFatal = true,
+  void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
 }) {
   return spawnIsolateConnection(
+    onConnect: onConnect,
     onExit: onExit,
     onError: onError,
     spawn: (send, control) => Isolate.spawn(
@@ -94,11 +103,13 @@ Future<IsolateConnection> spawnUriIsolate(
   Uri uri, {
   bool paused = false,
   bool errorsAreFatal = true,
+  void Function(SendPort send)? onConnect,
   void Function()? onExit,
   void Function(String error, StackTrace stackTrace)? onError,
   String? debugName,
 }) {
   return spawnIsolateConnection(
+    onConnect: onConnect,
     onExit: onExit,
     onError: onError,
     spawn: (send, control) => Isolate.spawnUri(

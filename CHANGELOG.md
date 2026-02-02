@@ -1,6 +1,6 @@
 ## 0.6.0
 
-- Removes `onConnect` callbacks in favor of `onSendPortReady` in `setupIsolate` to support headless restarts
+- Adds `onSendPortReady` in `setupIsolate` to support headless restarts
 - The `IsolateEntryPoint` and `setupIsolate` functions now accept a nullable `send` parameter to support headless restarts
 - The `connectToIsolate` function now supports `onExit` and `onError` callback setup
 
