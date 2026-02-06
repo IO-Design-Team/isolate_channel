@@ -1,3 +1,7 @@
+## 0.6.1
+
+- Fixes README
+
 ## 0.6.0
 
 - Adds `onSendPortReady` in `setupIsolate` to support headless restarts

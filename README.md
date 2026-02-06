@@ -4,7 +4,7 @@
 [![PubStats Rank](https://pubstats.dev/badges/packages/isolate_channel/rank.svg)](https://pubstats.dev/packages/isolate_channel)
 [![PubStats Dependents](https://pubstats.dev/badges/packages/isolate_channel/dependents.svg)](https://pubstats.dev/packages/isolate_channel)
 
-Communication channels for isolates based on Flutter's plugin channels
+Communication channels for isolates based on Flutter's platform channels
 
 ## Features
 
