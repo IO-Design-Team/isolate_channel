@@ -29,4 +29,7 @@ void isolateEntryPoint(SendPort? send) {
         return call.notImplemented();
     }
   });
+
+  IsolateMethodChannel('other', connection)
+      .setMethodCallHandler((call) => 'other');
 }

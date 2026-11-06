@@ -62,6 +62,19 @@ void main() async {
         );
       });
 
+      test('multiple channels', () async {
+        final other = IsolateMethodChannel('other', connection);
+        final results = await Future.wait([
+          for (var i = 0; i < 10; i++) ...[
+            channel.invokeMethod('invokeMethod', 'test'),
+            other.invokeMethod('invokeMethod', 'test'),
+          ],
+        ]);
+        expect(results, [
+          for (var i = 0; i < 10; i++) ...['test', 'other']
+        ]);
+      });
+
       test('multiple connections', () {
         IsolateMethodChannel createChannel(int connections) {
           return IsolateMethodChannel(

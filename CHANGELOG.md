@@ -1,3 +1,7 @@
+## 0.6.2
+
+- Message routing no longer slows down as more channels are opened
+
 ## 0.6.1
 
 - Fixes README

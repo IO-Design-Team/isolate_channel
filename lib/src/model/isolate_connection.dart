@@ -14,10 +14,11 @@ class IsolateConnection {
   /// Number of connections to this isolate
   int get connections => _sendPorts.length;
 
-  /// Stream of method invocations from other isolates
-  final Stream<MethodInvocation> _receive;
+  /// Method invocations from other isolates by channel
+  final _channels = <String, StreamController<MethodInvocation>>{};
   final void Function() _close;
-  late final StreamSubscription _subscription;
+  late final StreamSubscription _receiveSubscription;
+  late final StreamSubscription _controlSubscription;
 
   /// Constructor
   IsolateConnection({
@@ -25,10 +26,17 @@ class IsolateConnection {
     required Stream receive,
     required void Function() close,
   })  : _sendPorts = {if (send != null) send},
-        _receive = receive.map((message) => MethodInvocation.fromJson(message)),
         _close = close {
+    _receiveSubscription = receive.listen(
+      (message) {
+        final invocation = MethodInvocation.fromJson(message);
+        _channels[invocation.channel]?.add(invocation);
+      },
+      onDone: _closeChannels,
+    );
+
     // Handle new connections
-    _subscription = methodInvocations(_channel).listen((invocation) {
+    _controlSubscription = methodInvocations(_channel).listen((invocation) {
       switch (invocation.method) {
         case 'connect':
           _sendPorts.add(invocation.arguments);
@@ -57,7 +65,13 @@ class IsolateConnection {
 
   /// Stream of method invocations targeting [channel]
   Stream<MethodInvocation> methodInvocations(String channel) {
-    return _receive.where((invocation) => invocation.channel == channel);
+    return (_channels[channel] ??= StreamController.broadcast()).stream;
+  }
+
+  void _closeChannels() {
+    for (final controller in _channels.values) {
+      controller.close();
+    }
   }
 
   Future<void> _invokeWithResponse(
@@ -99,7 +113,9 @@ class IsolateConnection {
   ///
   /// If this connection spawned the isolate, the isolate will be killed
   void close() {
-    _subscription.cancel();
+    _controlSubscription.cancel();
+    _receiveSubscription.cancel();
+    _closeChannels();
     _close();
   }
 }
