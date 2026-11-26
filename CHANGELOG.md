@@ -1,3 +1,7 @@
+## 0.6.3
+
+- Adds optional `transform` callback to `IsolateEventChannel.receiveBroadcastStream`
+
 ## 0.6.2
 
 - Message routing no longer slows down as more channels are opened

@@ -20,7 +20,15 @@ class IsolateEventChannel {
   /// Receive a broadcast stream of events from the isolate
   ///
   /// To be called from the isolate receiving events
-  Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
+  ///
+  /// If [transform] is provided, each event is transformed once before being
+  /// broadcast to listeners. Unlike [Stream.map] on a broadcast stream, which
+  /// re-runs the mapper for every listener, this avoids redundant work and
+  /// safely handles single-use payloads such as [TransferableTypedData].
+  Stream<dynamic> receiveBroadcastStream([
+    dynamic arguments,
+    dynamic Function(dynamic event)? transform,
+  ]) {
     final receivePort = ReceivePort();
     final receive = receivePort.asBroadcastStream();
 
@@ -41,6 +49,12 @@ class IsolateEventChannel {
 
           if (event is IsolateException) {
             controller.addError(event);
+          } else if (transform != null) {
+            try {
+              controller.add(transform(event));
+            } catch (error, stackTrace) {
+              controller.addError(error, stackTrace);
+            }
           } else {
             controller.add(event);
           }
