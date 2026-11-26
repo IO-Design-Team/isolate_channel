@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:isolate_channel/isolate_channel.dart';
 import 'package:test/test.dart';
@@ -27,6 +28,22 @@ void main() async {
               details: 'details',
             ),
           ),
+          emitsDone,
+        ]),
+      );
+    });
+
+    test('event channel transform', () {
+      final stream = channel.receiveBroadcastStream(
+        null,
+        (event) => event == 'Hello' ? throw StateError('boom') : '$event',
+      );
+      expect(
+        stream,
+        emitsInOrder([
+          emitsError(isA<StateError>()),
+          'null',
+          emitsError(isAIsolateException(code: 'code')),
           emitsDone,
         ]),
       );
@@ -120,5 +137,42 @@ void main() async {
 
     final subscription2 = stream.listen((event) {});
     await subscription2.cancel();
+  });
+
+  test('transform runs once per event across listeners', () async {
+    final receivePort = ReceivePort();
+    final connection = IsolateConnection(
+      send: receivePort.sendPort,
+      receive: receivePort.asBroadcastStream(),
+      close: receivePort.close,
+    );
+    addTearDown(connection.close);
+
+    final channel = IsolateEventChannel('test', connection);
+    final sinkCompleter = Completer<IsolateEventSink>();
+    channel.setStreamHandler(
+      IsolateStreamHandler.inline(
+        onListen: (_, sink) => sinkCompleter.complete(sink),
+      ),
+    );
+
+    var calls = 0;
+    final stream = channel.receiveBroadcastStream(null, (e) {
+      calls++;
+      return (e as TransferableTypedData).materialize().asUint8List();
+    });
+
+    final listeners = [stream.toList(), stream.toList()];
+
+    final sink = await sinkCompleter.future;
+    final data = Uint8List.fromList([1, 2, 3]);
+    sink.success(TransferableTypedData.fromList([data]));
+    sink.endOfStream();
+
+    expect(await Future.wait(listeners), [
+      [data],
+      [data],
+    ]);
+    expect(calls, 1);
   });
 }
